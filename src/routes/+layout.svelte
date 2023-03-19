@@ -38,7 +38,7 @@
 </svelte:head>
 
 <div class="main-block">
-    <p on:click={goToRoot} on:keyup={goToRoot} class="logomark">Peer8</p>
+    <p on:click={goToRoot} on:keyup={goToRoot} class="logomark">peer8</p>
     <PageTransition pathname={data.pathname}>
         <div class="main">
             <slot />

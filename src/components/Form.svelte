@@ -1,13 +1,10 @@
 <script>
-
+export let onSubmit = () => {};
 </script>
 
-<div class="form">
+<form on:submit={onSubmit}>
     <slot/>
-</div>
+</form>
 
 <style>
-    .form {
-        @apply bg-white h-full
-    }
 </style>

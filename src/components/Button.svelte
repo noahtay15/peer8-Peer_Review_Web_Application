@@ -1,13 +1,14 @@
 <script lang="ts">
-	import { tweened } from 'svelte/motion';
 	import { onMount } from 'svelte';
 
 	export let action: string;
+	export let onClick: () => void;
 
 	let isAnimating = false;
 	let isLoading = false;
 
 	async function handleClick() {
+		onClick();
 		if (!isAnimating) {
 			isAnimating = true;
 			isLoading = true;

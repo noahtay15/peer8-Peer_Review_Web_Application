@@ -1,3 +1,5 @@
+import AWS from 'aws-sdk';
+
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
 declare global {
@@ -6,7 +8,10 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface Platform {}
+		interface Locals {
+			cognito: AWS.CognitoIdentityServiceProvider;
+		}
 	}
 }
 
-export {};
+export { };

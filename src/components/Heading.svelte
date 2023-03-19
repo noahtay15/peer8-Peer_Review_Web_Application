@@ -31,9 +31,11 @@
 	.comp {
 		@apply mt-10;
 	}
+	
 	.heading {
 		@apply text-3xl font-medium text-primary;
 	}
+
 	.subheading {
 		@apply text-xl font-normal;
 	}

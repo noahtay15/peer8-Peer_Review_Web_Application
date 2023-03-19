@@ -4,6 +4,10 @@
 	import Heading from '$components/Heading.svelte';
     import Button from '$components/Button.svelte';
 	import Link from '$components/Link.svelte';
+
+	const onC = () => {
+		console.log('clicked');
+	};
 </script>
 
 <div class="h-full">
@@ -11,8 +15,8 @@
 	<Form>
 		<Field placeholder="ex: example@gmail.com" label="Email Address" type="text" />
 		<Field placeholder="**********" label="Password" type="text" />
-        <Link text="Forgot password?" href="/forgot-password">Forgot Password?</Link>
-		<Button action="Login"/>
+        <Link text="Forgot password?" href="/forgot">Forgot Password?</Link>
+		<Button onClick={onC} action="Login"/>
 	</Form>
-	<Link text="Don't have an account?" href="/forgot-password">Forgot Password?</Link>
+	<Link hiddenText="Don't have an account?" text="Create an account." href="/signup"/>
 </div>

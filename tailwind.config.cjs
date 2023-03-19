@@ -6,8 +6,7 @@ const config = {
 			colors: {
 				primary: '#112E51',
 				secondary: '#FDB736',
-				inactiveButton: '#F0F0F0',
-				inactiveText: '#A0AEC0'
+				inactive: '#A0AEC0'
 			}
 		}
 	},

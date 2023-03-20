@@ -49,7 +49,6 @@
 <style>
 	.main-block {
 		@apply flex flex-col h-full w-full;
-		overflow-y: hidden;
 	}
 
 	.logomark {

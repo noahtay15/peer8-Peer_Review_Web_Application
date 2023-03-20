@@ -10,6 +10,8 @@ declare global {
 		// interface Platform {}
 		interface Locals {
 			cognito: AWS.CognitoIdentityServiceProvider;
+			error: string;
+			data: any;
 		}
 	}
 }

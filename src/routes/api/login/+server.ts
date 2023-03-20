@@ -2,15 +2,13 @@ import { json } from '@sveltejs/kit';
 import { clientId } from '$lib/aws/constants';
 import type AWS from 'aws-sdk';
 import type { AWSError } from 'aws-sdk';
-import type { SignUpResponse } from 'aws-sdk/clients/cognitoidentityserviceprovider';
-import { validateEmail, validatePassword } from '$lib/utils/validate';
+import type { InitiateAuthResponse } from 'aws-sdk/clients/cognitoidentityserviceprovider';
+import { validateEmail } from '$lib/utils/validate';
 
 export async function POST({ request, locals }) {
     const body = await request.json();
 
-
-    // TODO: Figure out what to do with class code
-    const { email, password, name, class_code } = body;
+    const { email, password } = body;
 
     const errors = [];
 
@@ -19,12 +17,8 @@ export async function POST({ request, locals }) {
         errors.push('Invalid email provided.');
     }
 
-    if (!validatePassword(password)) {
+    if (password === '') {
         errors.push('Invalid password provided.');
-    }
-
-    if (name === '') {
-        errors.push('Invalid name provided.');
     }
 
     if (errors.length > 0) {
@@ -33,29 +27,22 @@ export async function POST({ request, locals }) {
 
     interface PromiseResponse {
         error: string | null;
-        data: SignUpResponse | null;
+        data:  InitiateAuthResponse | null;
     }
 
 
     const cog = locals.cognito as AWS.CognitoIdentityServiceProvider;
 
-    const register = () => {
+    const login = () => {
         return new Promise((resolve) => {
-            cog.signUp({
+            cog.initiateAuth({
                 ClientId: clientId,
-                Username: email,
-                Password: password,
-                UserAttributes: [
-                    {
-                        Name: 'name',
-                        Value: name
-                    },
-                    {
-                        Name: 'picture',
-                        Value: ''
-                    },
-                ],
-            } as AWS.CognitoIdentityServiceProvider.SignUpRequest, function (err: AWSError, data: SignUpResponse) {
+                AuthFlow: 'USER_PASSWORD_AUTH',
+                AuthParameters: {
+                    USERNAME: email,
+                    PASSWORD: password,
+                }
+            } as AWS.CognitoIdentityServiceProvider.InitiateAuthRequest, function (err: AWSError, data: InitiateAuthResponse) {
                 if (err) {
                     console.log(err.message); // an error occurred
                     resolve({
@@ -63,6 +50,7 @@ export async function POST({ request, locals }) {
                         data: null,
                     } as PromiseResponse);
                 }
+
                 resolve({
                     error: null,
                     data: data,
@@ -72,11 +60,11 @@ export async function POST({ request, locals }) {
     }
 
     // convert unknown to PromiseResponse
-    const response = await register() as PromiseResponse;
+    const response = await login() as PromiseResponse;
 
     if (response.error) {
         return json({ message: response.error }, { status: 400 });
     }
 
-    return json({ message: 'Successfully registered user.'}, { status: 200 });
+    return json({ message: 'Successfully logged in.', data: response.data?.AuthenticationResult}, { status: 200 });
 }

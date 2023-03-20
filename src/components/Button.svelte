@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 
 	export let action: string;
-	export let onClick: () => void;
+	export let onClick: () => Promise<void> = () => Promise.resolve();
 
 	let isAnimating = false;
 	let isLoading = false;

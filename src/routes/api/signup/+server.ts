@@ -3,14 +3,14 @@ import { clientId } from '$lib/aws/constants';
 import type AWS from 'aws-sdk';
 import type { AWSError } from 'aws-sdk';
 import type { SignUpResponse } from 'aws-sdk/clients/cognitoidentityserviceprovider';
+import type { AWSPromiseResponse } from '$lib/types/AWSResponse';
 import { validateEmail, validatePassword } from '$lib/utils/validate';
 
 export async function POST({ request, locals }) {
     const body = await request.json();
 
-
     // TODO: Figure out what to do with class code
-    const { email, password, name, class_code } = body;
+    const { email, password, name, type, class_code } = body;
 
     const errors = [];
 
@@ -27,15 +27,13 @@ export async function POST({ request, locals }) {
         errors.push('Invalid name provided.');
     }
 
+    if (type === '' || (type.toLowerCase() !== 'student' && type.toLowerCase() !== 'instructor')) {
+        errors.push('Invalid type provided.');
+    }
+
     if (errors.length > 0) {
         return json({ message: "Missing or invalid fields.", errors }, { status: 400 });
     }
-
-    interface PromiseResponse {
-        error: string | null;
-        data: SignUpResponse | null;
-    }
-
 
     const cog = locals.cognito as AWS.CognitoIdentityServiceProvider;
 
@@ -54,6 +52,10 @@ export async function POST({ request, locals }) {
                         Name: 'picture',
                         Value: ''
                     },
+                    {
+                        Name: 'custom:user_type',
+                        Value: type
+                    }
                 ],
             } as AWS.CognitoIdentityServiceProvider.SignUpRequest, function (err: AWSError, data: SignUpResponse) {
                 if (err) {
@@ -61,18 +63,18 @@ export async function POST({ request, locals }) {
                     resolve({
                         error: err.message,
                         data: null,
-                    } as PromiseResponse);
+                    } as AWSPromiseResponse);
                 }
                 resolve({
                     error: null,
                     data: data,
-                } as PromiseResponse);
+                } as AWSPromiseResponse);
             });
         });
     }
 
     // convert unknown to PromiseResponse
-    const response = await register() as PromiseResponse;
+    const response = await register() as AWSPromiseResponse;
 
     if (response.error) {
         return json({ message: response.error }, { status: 400 });

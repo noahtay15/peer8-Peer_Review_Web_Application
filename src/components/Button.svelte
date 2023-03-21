@@ -1,3 +1,5 @@
+<!-- TODO: Add a disabled state for the button -->
+
 <script lang="ts">
 	import { onMount } from 'svelte';
 

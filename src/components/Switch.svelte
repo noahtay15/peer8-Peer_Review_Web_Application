@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 
 	export let options = ['Student', 'Instructor'];
+	export let selectedOption = '';
 
 	let currentIndex = 0;
 
@@ -22,9 +23,8 @@
 
 	onMount(() => {
 		activeOption.subscribe((value) => {
-			// console.log(value);
-
-			console.log(value * 144);
+			currentIndex = value;
+			selectedOption = options[currentIndex];
 		});
 	});
 </script>

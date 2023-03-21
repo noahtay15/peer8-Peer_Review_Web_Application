@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { currentLevel } from '$lib/stores/navigation';
-	import '../app.postcss';
+	import '../../app.postcss';
 	import PageTransition from '$lib/components/PageTransition.svelte';
 
 	export let data;
@@ -56,6 +56,6 @@
 	}
 
 	.main {
-		@apply h-full mt-20 mx-8 justify-center md:mx-32 lg:mx-72 md:pb-10 lg:pb-28;
+		@apply mt-20 mx-8 justify-center md:mx-32 lg:mx-72 md:pb-10 lg:pb-28;
 	}
 </style>

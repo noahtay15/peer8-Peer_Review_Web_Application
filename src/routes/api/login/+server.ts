@@ -33,6 +33,7 @@ export async function POST({ request, locals }) {
 
     const cog = locals.cognito as AWS.CognitoIdentityServiceProvider;
 
+    // TODO: Figure out how to do USER_SRP_AUTH instead
     const login = () => {
         return new Promise((resolve) => {
             cog.initiateAuth({
@@ -41,7 +42,8 @@ export async function POST({ request, locals }) {
                 AuthParameters: {
                     USERNAME: email,
                     PASSWORD: password,
-                }
+                    SRP_A: 'A',
+                },
             } as AWS.CognitoIdentityServiceProvider.InitiateAuthRequest, function (err: AWSError, data: InitiateAuthResponse) {
                 if (err) {
                     console.log(err.message); // an error occurred

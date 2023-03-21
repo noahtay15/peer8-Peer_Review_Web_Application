@@ -5,7 +5,7 @@
 	export let value: string;
 	export let validator: (value: string) => boolean = () => true;
 	export let valid: boolean = true;
-	export let inputFor: string;
+	export let err_message: string = '';
 
 	function typeAction(node: HTMLInputElement) {
 		node.type = type;
@@ -19,21 +19,20 @@
 <div class="comp">
 	<h1 class="label">{label}</h1>
 	<div class="input-container">
-		<input class="input" use:typeAction {placeholder} bind:value on:change={validate} />
-		<div class="input-border" class:invalid={!valid} />
+		<input class="input" use:typeAction {placeholder} bind:value on:change={validate} class:invalid={!valid} class:normal={valid} />
 	</div>
 	{#if !valid}
-		<p class="error">Please enter a valid {inputFor}</p>
+		<p class="error">{err_message}</p>
 	{/if}
 </div>
 
 <style lang="scss">
 	.comp {
-		@apply mt-10 overflow-y-scroll;
+		@apply mt-10;
 	}
 
 	.input {
-		@apply w-full h-10 px-4 py-2 border-2 border-[#D2D1D1] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#726998] focus:border-transparent;
+		@apply w-full h-10 px-4 py-2 border-2 border-[#D2D1D1] rounded-md shadow-sm;
 	}
 
 	.label {
@@ -42,5 +41,13 @@
 
 	.error {
 		@apply text-red-500 text-base font-light mt-3;
+	}
+
+	.normal {
+		@apply border-[#D2D1D1] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+	}
+
+	.invalid {
+		@apply border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent;
 	}
 </style>

@@ -1,17 +1,21 @@
 <!-- TODO: Fix highlighted state of mobile nav icon -->
-
 <script lang="ts">
 	import NavGroup from '$components/NavGroup.svelte';
 	import NavItem from '$components/NavItem.svelte';
 	import PageTransition from '$lib/components/PageTransition.svelte';
+	import Modal from '$components/Modal.svelte';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import '../../app.postcss';
+	import PeerReview from '$components/Modals/PeerReview.svelte';
+	import AddClass from '$components/Modals/AddClass.svelte';
 	// Import any necessary components, such as the navigation menu
 	// layout
 	export let data;
 
 	let navIsOpen = false;
+	let showModal = false;
+	let modals: any = [];
 
 	onMount(() => {
 		console.log(data.pathname);
@@ -21,6 +25,15 @@
 		navIsOpen = !navIsOpen;
 		console.log(navIsOpen);
 	}
+
+	const openModal = (data: any) => {
+		modals = [...modals, data];
+
+		console.log(modals)
+	};
+	const closeModal = (modalId: any) => {
+		modals = modals.filter((modal: any) => modal.id !== modalId);
+	};
 </script>
 
 <svelte:head>
@@ -33,7 +46,38 @@
 		<!-- Navigation column (for larger screens) -->
 		<div class="hidden lg:block h-full w-[25rem] px-8">
 			<p on:click={() => {}} on:keyup={() => {}} class="logomark">peer8</p>
-			<NavGroup category="Classes" searchable>
+			<NavGroup
+				category="Classes"
+				searchable
+				onAdd={() => {
+					/*openModal({
+						id: 'prv',
+						title: 'Create a New Peer Review',
+						content: PeerReview,
+						onSubmit: () => {
+							console.log('Form submitted!');
+							closeModal('prv');
+						},
+						onClose: () => {
+							console.log('Modal closed!');
+							closeModal('prv');
+						}
+					});*/
+					openModal({
+						id: 'addClass',
+						title: 'Create a Class',
+						content: AddClass,
+						onSubmit: () => {
+							console.log('Form submitted!');
+							closeModal('addClass');
+						},
+						onClose: () => {
+							console.log('Modal closed!');
+							closeModal('addClass');
+						}
+					});
+				}}
+			>
 				<NavItem href="/class" active={data.pathname === '/class'} className="Class 1"
 					>Classes</NavItem
 				>
@@ -47,7 +91,7 @@
 		<!-- Navigation dropdown (for smaller screens) -->
 		<div class="lg:hidden w-full">
 			<div class="flex flex-row items-center justify-between px-8">
-				<p on:click={toggleNav} class="logomark">peer8</p>
+				<p on:click={toggleNav} on:keyup={toggleNav} class="logomark">peer8</p>
 				<button
 					on:click={toggleNav}
 					aria-label="Toggle Navigation"
@@ -91,6 +135,20 @@
 				<slot />
 			</PageTransition>
 		</div>
+	</div>
+	<div>
+		{#each modals as modal}
+			<Modal
+				title={modal.title}
+				showModal={true}
+				onSubmit={modal.onSubmit}
+				onClose={modal.onClose}
+			>
+				{#if modal.content}
+					<svelte:component this={modal.content} onSubmit={modal.onSubmit} onClose={modal.onClose} />
+				{/if}
+			</Modal>
+		{/each}
 	</div>
 </div>
 

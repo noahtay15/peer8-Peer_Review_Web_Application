@@ -31,7 +31,7 @@
 	<p class="res-error">{error}</p>
 	<Form>
 		<Field err_message={emailError} placeholder="ex: example@gmail.com" label="Email Address" type="text" bind:value={email} bind:valid={emailValid} />
-		<Field placeholder="**********" label="Password" type="text" bind:value={password} />
+		<Field placeholder="**********" label="Password" type="password" bind:value={password} />
         <Link text="Forgot password?" href="/forgot">Forgot Password?</Link>
 		<Button onClick={onC} action="Login"/>
 	</Form>

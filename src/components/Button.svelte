@@ -6,6 +6,7 @@
 	export let action: string;
 	export let onClick: () => Promise<void> = () => Promise.resolve();
 
+	export let animation: boolean = true;
 	let isAnimating = false;
 	let isLoading = false;
 
@@ -29,7 +30,7 @@
 
 <div class="comp">
 	<button class="btn animating h-12 outline-none" on:click={handleClick}>
-		{#if isLoading}
+		{#if isLoading && animation}
 			<svg
 				width="24"
 				height="24"

@@ -4,4 +4,4 @@
 	export let classes = '';
 </script>
 
-<svelte:component this={icon} class="w-6 h-6 ml-auto mt-1 cursor-pointer" on:click={onClick} />
+<svelte:component this={icon} class="w-6 h-6 ml-auto mt-1 cursor-pointer outline-none" on:click={onClick} />

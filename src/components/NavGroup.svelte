@@ -4,6 +4,7 @@
 	export let category = '';
 	export let searchable = false;
 	export let addable = true;
+	export let onAdd = () => {};
 </script>
 
 <div class="comp">
@@ -12,7 +13,9 @@
 			<div class="flex flex-row">
 				<h1 class="nav-group-title">{category}</h1>
 				{#if addable}
+				<div class="ml-auto" on:click={onAdd} on:keyup={onAdd}>
 					<IconButton icon={PlusIcon} classes="ml-[10rem]" />
+				</div>
 				{/if}
 			</div>
 			{#if searchable}

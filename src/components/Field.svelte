@@ -32,11 +32,11 @@
 	}
 
 	.input {
-		@apply w-full h-10 px-4 py-2 border-2 border-[#D2D1D1] rounded-md shadow-sm;
+		@apply w-full h-10 px-4 py-2 border-none bg-[#F0F0F0] focus:ring-transparent rounded-md;
 	}
 
 	.label {
-		@apply text-base font-light mb-3;
+		@apply text-base font-medium mb-3 text-primary;
 	}
 
 	.error {

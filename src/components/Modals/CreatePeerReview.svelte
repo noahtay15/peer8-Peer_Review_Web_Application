@@ -6,7 +6,6 @@
     import Form from '../Form.svelte';
 
 	export let onSubmit = async () => {};
-	export let onClose = async () => {};
 
 	const getStudents = async (search: string) => {
 		let options = ['hello', 'world', 'test', 'test2'];
@@ -25,7 +24,6 @@
 		<Select label="Template" placeholder="Choose from a template" fetchOptions={getStudents}/>
 		<Datepicker label="Due Date" placeholder="" value={''} />
 		<Select label="Students" placeholder="Search for a student" fetchOptions={getStudents}/>
-		<Button onClick={onSubmit} action="Submit" animation={false} >Submit</Button>
-		<Button onClick={onClose} action="Close" animation={false} >Close</Button>
+		<Button onClick={onSubmit} action="Create Peer Review" animation={false} />
 	</Form>
 </template>

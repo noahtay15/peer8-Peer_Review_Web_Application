@@ -5,19 +5,21 @@ import type { AWSError } from 'aws-sdk';
 import type { InitiateAuthResponse } from 'aws-sdk/clients/cognitoidentityserviceprovider';
 import { validateEmail } from '$lib/utils/validate';
 
-export async function POST({ request, locals }) {
-    const body = await request.json();
+export async function POST({ request, locals } : { request: Request, locals: App.Locals }) {
+    const accessToken = request.headers.get('Authorization')?.replace('Bearer ', '');
+    const body = !accessToken ? await request.json() : {};
+
 
     const { email, password } = body;
 
     const errors = [];
 
     // Validate body
-    if (!validateEmail(email)) {
+    if (!validateEmail(email) && !accessToken) {
         errors.push('Invalid email provided.');
     }
 
-    if (password === '') {
+    if (password === '' && !accessToken) {
         errors.push('Invalid password provided.');
     }
 
@@ -38,17 +40,18 @@ export async function POST({ request, locals }) {
         return new Promise((resolve) => {
             cog.initiateAuth({
                 ClientId: clientId,
-                AuthFlow: 'USER_PASSWORD_AUTH',
+                AuthFlow: !accessToken ? 'USER_PASSWORD_AUTH' : 'REFRESH_TOKEN_AUTH',
                 AuthParameters: {
                     USERNAME: email,
                     PASSWORD: password,
+                    REFRESH_TOKEN: accessToken,
                     SRP_A: 'A',
                 },
             } as AWS.CognitoIdentityServiceProvider.InitiateAuthRequest, function (err: AWSError, data: InitiateAuthResponse) {
                 if (err) {
                     console.log(err.message); // an error occurred
                     resolve({
-                        error: err.message,
+                        error: `${err.code}: ${err.message}`,
                         data: null,
                     } as PromiseResponse);
                 }

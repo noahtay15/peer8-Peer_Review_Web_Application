@@ -32,8 +32,24 @@
 		<div class="modal">
 			<div class="modal-header">
 				<h1>{title}</h1>
+				<!-- Close svg X-->
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 ml-auto cursor-pointer self-center"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+					on:click={handleClose}
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
 			</div>
-			<div class="modal-content">
+			<div class="modal-content" style="max-height: 50vh; overflow-y: auto;">
 				<slot />
 			</div>
 		</div>
@@ -57,10 +73,34 @@
 		background-color: #fff;
 		padding: 2rem;
 		border-radius: 5px;
-		width: 30rem;
+	}
+
+	.modal-content {
+		@apply px-2
 	}
 
 	.modal-header h1 {
 		@apply text-2xl font-bold text-primary;
+	}
+
+	.modal-header {
+		@apply flex flex-row;
+	}
+
+	.modal-content::-webkit-scrollbar {
+		width: 5px;
+	}
+
+	.modal-content::-webkit-scrollbar-track {
+		background: #f1f1f1;
+	}
+
+	.modal-content::-webkit-scrollbar-thumb {
+		background: #888;
+		border-radius: 5px;
+	}
+
+	.modal-content::-webkit-scrollbar-thumb:hover {
+		background: #555;
 	}
 </style>

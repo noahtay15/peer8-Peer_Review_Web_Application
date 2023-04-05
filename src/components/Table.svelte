@@ -1,6 +1,8 @@
-<script>
-	import IconButton from './IconButton.svelte';
-	import { EyeIcon } from 'svelte-feather-icons';
+<script lang="ts">
+	interface Row {
+		[key: string]: any;
+	}
+
 	export let columns = [
 		{
 			name: 'Name',
@@ -40,15 +42,15 @@
 		}
 	];
 
-	export let data = [
+	export let data: Row[] = [
 		{
 			name: 'Assignment 1',
 			email: 'test@gmail.com',
 			status: 'Open',
 			group: 'Group 1',
 			last_submission: '2021-05-01 12:00:00',
-            score: 100,
-            maxScore: 100,
+			score: 100,
+			maxScore: 100,
 			tags: ['Design', 'Product', 'Develop'],
 			actions: ''
 		}
@@ -67,32 +69,11 @@
 		<tbody class="divide-y divide-gray-100 border-t border-gray-100">
 			{#each data as row}
 				<tr class="hover:bg-gray-50">
-					<td class="flex gap-3 px-6 py-4 font-normal text-gray-900">
-						<div class="text-sm">
-							<div class="font-medium text-gray-700">{row.name}</div>
-							<!-- <div class="text-gray-400">{row.email}</div> -->
-						</div>
-					</td>
-					<td class="px-6 py-4">
-						<span
-							class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-600"
-						>
-							<span class="h-1.5 w-1.5 rounded-full bg-green-600" />
-							{row.status}
-						</span>
-					</td>
-					<td class="px-6 py-4">{row.group}</td>
-					<td class="px-6 py-4 font-bold">{`${row.score} / ${row.maxScore}`}</td>
-					<td class="px-6 py-4">{row.last_submission}</td>
-					<td class="px-6 py-4">
-						<div class="flex justify-end gap-4">
-							<IconButton
-								icon={EyeIcon}
-								text="View"
-								onClick={() => console.log('View')}
-							/>
-						</div>
-					</td>
+					{#each columns as column}
+						<td class="px-6 py-4">
+							{row[column.key]}
+						</td>
+					{/each}
 				</tr>
 			{/each}
 		</tbody>

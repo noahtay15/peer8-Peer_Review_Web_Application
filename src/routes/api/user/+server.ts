@@ -1,68 +1,43 @@
+import type { AWSPromiseResponse } from '$lib/types/AWSResponse';
+import type { PrismaClient } from '@prisma/client';
 import { json } from '@sveltejs/kit';
-import { clientId } from '$lib/aws/constants';
 import type AWS from 'aws-sdk';
 import type { AWSError } from 'aws-sdk';
-import type { InitiateAuthResponse } from 'aws-sdk/clients/cognitoidentityserviceprovider';
-import { validateEmail } from '$lib/utils/validate';
+import type { GetUserRequest, GetUserResponse } from 'aws-sdk/clients/cognitoidentityserviceprovider';
 
-export async function GET({ request, locals }) {
-    const errors = [];
-
-    // Validate body
-    if (!validateEmail(email)) {
-        errors.push('Invalid email provided.');
-    }
-
-    if (password === '') {
-        errors.push('Invalid password provided.');
-    }
-
-    if (errors.length > 0) {
-        return json({ message: "Missing or invalid fields.", errors }, { status: 400 });
-    }
-
-    interface PromiseResponse {
-        error: string | null;
-        data:  InitiateAuthResponse | null;
-    }
-
-
+export async function GET({ locals }) {
     const cog = locals.cognito as AWS.CognitoIdentityServiceProvider;
 
+
     // TODO: Figure out how to do USER_SRP_AUTH instead
-    const login = () => {
+    const getUser = () => {
         return new Promise((resolve) => {
             cog.getUser({
-                ClientId: clientId,
-                AuthFlow: 'USER_PASSWORD_AUTH',
-                AuthParameters: {
-                    USERNAME: email,
-                    PASSWORD: password,
-                    SRP_A: 'A',
-                },
-            } as AWS.CognitoIdentityServiceProvider.InitiateAuthRequest, function (err: AWSError, data: InitiateAuthResponse) {
+                AccessToken: locals.token as string,
+            } as GetUserRequest, function (err: AWSError, data: GetUserResponse) {
                 if (err) {
                     console.log(err.message); // an error occurred
+                    console.log(err.code)
                     resolve({
-                        error: err.message,
+                        error: `${err.code}: ${err.message}`,
                         data: null,
-                    } as PromiseResponse);
+                    } as AWSPromiseResponse);
                 }
 
                 resolve({
                     error: null,
                     data: data,
-                } as PromiseResponse);
+                } as AWSPromiseResponse);
             });
         });
     }
 
     // convert unknown to PromiseResponse
-    const response = await login() as PromiseResponse;
+    const response = await getUser() as AWSPromiseResponse;
 
     if (response.error) {
         return json({ message: response.error }, { status: 400 });
     }
 
-    return json({ message: 'Successfully logged in.', data: response.data?.AuthenticationResult}, { status: 200 });
+    return json({ message: 'Successfully retrieved user details.', data: response.data}, { status: 200 });
 }

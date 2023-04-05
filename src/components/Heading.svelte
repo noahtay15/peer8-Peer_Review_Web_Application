@@ -9,7 +9,7 @@
 
 	const goBack = () => {
 		if ($currentLevel > 0) {
-			goto('/')
+			window.history.back();
 		}
 	};
 </script>

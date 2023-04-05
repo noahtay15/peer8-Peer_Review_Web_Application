@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { onMount, afterUpdate } from 'svelte';
-	import { TrashIcon, CheckIcon } from 'svelte-feather-icons';
+	import { CheckIcon } from 'svelte-feather-icons';
 
 	export let label: string;
 	export let placeholder: string;
@@ -69,7 +69,7 @@
 	onMount(async () => {
 		await getOptions(searchText);
 		if (multiSelect) {
-			states = dropdownOptions.reduce((acc, option) => {
+			states = dropdownOptions.reduce((acc: any, option: any) => {
 				acc[option] = value.includes(option);
 				return acc;
 			}, {});
@@ -218,7 +218,7 @@
 	}
 
 	.non-selected-dropdown-option {
-		@apply bg-gray-200;
+		@apply bg-gray-200 border-[1px] border-inactive;
 	}
 
 	.single-select {

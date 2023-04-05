@@ -1,3 +1,4 @@
+import type { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import AWS from 'aws-sdk';
 
 // See https://kit.svelte.dev/docs/types#app
@@ -12,6 +13,10 @@ declare global {
 			cognito: AWS.CognitoIdentityServiceProvider;
 			error: string;
 			data: unknown;
+			prisma: PrismaClient;
+			token: string;
+			id_token: string;
+			claims: CognitoIdTokenPayload;
 		}
 	}
 }

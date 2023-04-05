@@ -1,32 +1,19 @@
 <script lang="ts">
 	import Table from '$components/Table.svelte';
+    import InstructorClass from '$layouts/Instructor/InstructorClass.svelte';
+    import StudentClass from '$layouts/Student/StudentClass.svelte';
     import { onMount } from 'svelte';
-    //import { goto } from '@roxi/routify';
-    // import { user } from '$lib/stores';
-    import { get } from 'svelte/store';
-
-    //let classId = $params.id;
-    //let userId = $user.id;
-    let isStudent = false;
+    import { user } from '$lib/stores/user';
+	import { goto } from '$app/navigation';
 
     // TODO: Pull class data by id
-
     onMount(async () => {
+        //goto('/class/1/review/1');
     });
 </script>
 
-<div>
-    <h1 class="page-heading">Mock Class</h1>
-    <h2 class="subheading">Peer Review Assignments</h2>
-    <Table />
-</div>
-
-<style>
-.page-heading {
-    @apply font-bold text-3xl mt-2;
-}
-
-.subheading {
-    @apply font-bold text-2xl mt-[5rem] text-primary;
-}
-</style>
+{#if $user.type === "Student"}
+    <StudentClass />
+{:else if $user.type === "Instructor"}
+    <InstructorClass />
+{/if}

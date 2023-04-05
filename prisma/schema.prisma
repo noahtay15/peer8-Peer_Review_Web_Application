@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id                      Int                       @id @default(autoincrement())
+  name                    String                    @db.VarChar(255)
+  email                   String                    @unique @db.VarChar(255)
+  type                    String                    @db.VarChar(255)
+  classes                 classes[]
+  class_students          class_students[]
+  peer_review_submissions peer_review_submissions[]
+  peer_review_assignments peer_review_assignments[]
+  templates               templates[]
+  created_at              DateTime                  @default(now())
+  last_updated            DateTime                  @default(now())
+}
+
+model classes {
+  id             Int              @id @default(autoincrement())
+  instructor_id  Int
+  name           String           @db.VarChar(255)
+  code           String           @db.VarChar(255)
+  created_at     DateTime         @default(now())
+  last_updated   DateTime         @default(now())
+  users          users            @relation(fields: [instructor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_instructor_id")
+  class_students class_students[]
+  peer_reviews   peer_reviews[]
+}
+
+model class_students {
+  id         Int     @id @default(autoincrement())
+  class_id   Int
+  student_id Int
+  accepted   Boolean
+  classes    classes @relation(fields: [class_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_class_id")
+  users      users   @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_student_id")
+}
+
+model templates {
+  id           Int         @id @default(autoincrement())
+  name         String      @db.VarChar(255)
+  max_points   Int
+  created_at   DateTime    @default(now())
+  last_updated DateTime    @default(now())
+  questions    questions[]
+  creator_id   Int
+  creator      users       @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_creator_id")
+}
+
+model questions {
+  id           Int       @id @default(autoincrement())
+  template_id  Int
+  question     String    @db.VarChar(255)
+  max_points   Int
+  created_at   DateTime  @default(now())
+  last_updated DateTime  @default(now())
+  templates    templates @relation(fields: [template_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_template_id")
+}
+
+model peer_reviews {
+  id                      Int                       @id @default(autoincrement())
+  class_id                Int
+  name                    String                    @db.VarChar(255)
+  description             String?
+  created_at              DateTime                  @default(now())
+  last_updated            DateTime                  @default(now())
+  classes                 classes                   @relation(fields: [class_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_class_id_2")
+  peer_review_assignments peer_review_assignments[]
+}
+
+model peer_review_assignments {
+  id                      Int                       @id @default(autoincrement())
+  peer_review_id          Int
+  student_id              Int
+  status                  String                    @db.VarChar(255)
+  final_score             Int?                      @default(0)
+  created_at              DateTime                  @default(now())
+  last_updated            DateTime                  @default(now())
+  peer_reviews            peer_reviews              @relation(fields: [peer_review_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_peer_review_id")
+  users                   users                     @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_student_id_2")
+  peer_review_submissions peer_review_submissions[]
+  groups                  groups[]
+}
+
+model groups {
+  id                        Int                     @id @default(autoincrement())
+  peer_review_assignment_id Int
+  created_at                DateTime                @default(now())
+  last_updated              DateTime                @default(now())
+  peer_review_assignments   peer_review_assignments @relation(fields: [peer_review_assignment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_peer_review_assignment_id")
+}
+
+model peer_review_submissions {
+  id                        Int                     @id @default(autoincrement())
+  peer_review_assignment_id Int
+  student_id                Int
+  score                     Int?
+  created_at                DateTime                @default(now())
+  last_updated              DateTime                @default(now())
+  peer_review_assignments   peer_review_assignments @relation(fields: [peer_review_assignment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_peer_review_assignment_id_2")
+  users                     users                   @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_student_id_3")
+}

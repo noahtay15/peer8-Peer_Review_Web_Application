@@ -4,6 +4,7 @@
     // @ts-ignore
 	import { FontAwesomeIcon } from 'fontawesome-svelte';
     import {goto} from '$app/navigation';
+	import { onMount } from 'svelte';
 
     library.add(faGraduationCap);
 
@@ -14,6 +15,10 @@
     const navigate = () => {
         goto(href);
     }
+
+	onMount(() => {
+		console.log(href);
+	});
 </script>
 
 <div class="comp">

@@ -26,7 +26,7 @@ export async function GET({ locals, url }: { locals: App.Locals, url: URL }) {
         total_length = await getStudentClassCount(prisma, email as string);
     }
 
-    return json({ message: 'Successfully retrieved classes.', data: { classes, length: classes.length, total_length } }, { status: 200 });
+    return json({ message: 'Successfully retrieved classes.', data: { classes, length: classes.length, total_length, pages: Math.ceil(total_length / 5) } }, { status: 200 });
 }
 
 async function getInstructorClassData(prisma: PrismaClient, email: string, page: number) {

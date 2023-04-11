@@ -1,13 +1,12 @@
 <script lang="ts">
     interface Tab {
         name: string;
-        component: any;
         props: any;
     }
 
 	export let tabs: Tab[] = [];
 
-	let currentTab = 0;
+	export let currentTab = 0;
 
 	const switchTab = (index: number) => {
 		currentTab = index;
@@ -27,7 +26,9 @@
             </h1>
         {/each}
     </div>
-    <svelte:component this={tabs[currentTab].component} {...tabs[currentTab].props}/>
+    <div class="tab-content">
+        <slot></slot>
+    </div>
 </div>
 
 <style>

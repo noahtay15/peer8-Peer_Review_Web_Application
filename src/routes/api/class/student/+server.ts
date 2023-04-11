@@ -125,16 +125,23 @@ export async function POST({ request, locals }) {
 
         const uniqueEmails = [...new Set(emails)];
 
-        // Get user objects for each email address
-        const studentsToAdd = await Promise.all(uniqueEmails.map(async (email) => {
-            const student = await prisma.users.findUnique({
+         // Get or create user objects for each email address
+         const studentsToAdd = await Promise.all(uniqueEmails.map(async (email) => {
+            let student = await prisma.users.findUnique({
                 where: {
                     email: email.toLowerCase(),
                 },
             });
 
             if (!student) {
-                errors.push(`User with email ${email} not found.`);
+                // Create temporary user
+                student = await prisma.users.create({
+                    data: {
+                        email: email.toLowerCase(),
+                        type: 'student',
+                        name: '',
+                    },
+                });
             }
 
             return student;

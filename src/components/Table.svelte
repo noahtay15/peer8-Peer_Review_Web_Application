@@ -3,6 +3,11 @@
 		[key: string]: any;
 	}
 
+	interface Action {
+		label: string;
+		onClick: (row: Row) => void;
+	}
+
 	export let columns = [
 		{
 			name: 'Name',
@@ -24,7 +29,7 @@
 		},
 		{
 			name: 'Score',
-			key: 'Score',
+			key: 'score',
 			sortable: true,
 			searchable: true
 		},
@@ -35,7 +40,7 @@
 			searchable: true
 		},
 		{
-			name: '',
+			name: 'Actions',
 			key: 'actions',
 			sortable: false,
 			searchable: false
@@ -52,7 +57,26 @@
 			score: 100,
 			maxScore: 100,
 			tags: ['Design', 'Product', 'Develop'],
-			actions: ''
+			actions: {
+				edit: {
+					label: 'Edit',
+					onClick: (row: any) => {
+						console.log(`Editing ${row.name}`);
+					}
+				},
+				delete: {
+					label: 'Delete',
+					onClick: (row: any) => {
+						console.log(`Deleting ${row.name}`);
+					}
+				},
+				view: {
+					label: 'View',
+					onClick: (row: any) => {
+						console.log(`Viewing ${row.name}`);
+					}
+				}
+			}
 		}
 	];
 </script>
@@ -70,9 +94,20 @@
 			{#each data as row}
 				<tr class="hover:bg-gray-50">
 					{#each columns as column}
-						<td class="px-6 py-4">
-							{row[column.key]}
-						</td>
+						{#if column.key === 'actions'}
+							<td class="px-6 py-4 text-right">
+								{#each Object.entries(row[column.key]) as [key, action]}
+									<button class="px-3 py-1 mr-2 rounded-md bg-primary text-white"
+										on:click={() => action.onClick(row)}>
+										{action.label}
+									</button>
+								{/each}
+							</td>
+						{:else}
+							<td class="px-6 py-4">
+								{row[column.key]}
+							</td>
+						{/if}
 					{/each}
 				</tr>
 			{/each}
@@ -80,20 +115,3 @@
 	</table>
 </div>
 
-<!-- <div class="flex gap-2">
-    <span
-        class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-600"
-    >
-        Design
-    </span>
-    <span
-        class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-600"
-    >
-        Product
-    </span>
-    <span
-        class="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-1 text-xs font-semibold text-violet-600"
-    >
-        Develop
-    </span>
-</div> -->

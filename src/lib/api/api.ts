@@ -202,6 +202,34 @@ export const getClasses = async (token: string, id_token: string, page = 0): Pro
     } as ExtendedAPIResponse;
 }
 
+export const createClass = async (token: string, id_token: string, data: any): Promise<ExtendedAPIResponse> => {
+    let res = {
+        message: "Unknown error.",
+        errors: [],
+        data: null
+    } as APIResponse;
+    
+    let status = 0;
+
+    await fetch("/api/class", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            AuthorizationId: `Bearer ${id_token}`,
+        },
+        body: JSON.stringify(data),
+    }).then(async (response) => {
+        res = await response.json() as APIResponse;
+        status = response.status;
+    });
+
+    return {
+        status: status,
+        ...res
+    } as ExtendedAPIResponse;
+}
+
 export const getTemplates = async (token: string, id_token: string, page = 0): Promise<ExtendedAPIResponse> => {
     let res = {
         message: "Unknown error.",
@@ -256,3 +284,58 @@ export const createTemplate = async (token: string, id_token: string, data: any)
         ...res
     } as ExtendedAPIResponse;
 }
+
+export const getStudents = async (token: string, id_token: string, data: any): Promise<ExtendedAPIResponse> => {
+    let res = {
+        message: "Unknown error.",
+        errors: [],
+        data: null
+    } as APIResponse;
+
+    let status = 0;
+    
+    await fetch(`/api/students?page=${data.page ? data.page : 0}&classId=${data.classId ? data.classId : -1}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            AuthorizationId: `Bearer ${id_token}`,
+        },
+    }).then(async (response) => {
+        res = await response.json() as APIResponse;
+        status = response.status;
+    });
+
+    return {
+        status: status,
+        ...res
+    } as ExtendedAPIResponse;
+}
+
+export const getPeerReviews = async (token: string, id_token: string, data: any): Promise<ExtendedAPIResponse> => {
+    let res = {
+        message: "Unknown error.",
+        errors: [],
+        data: null
+    } as APIResponse;
+
+    let status = 0;
+    
+    await fetch(`/api/reviews?page=${data.page ? data.page : 0}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            AuthorizationId: `Bearer ${id_token}`,
+        },
+    }).then(async (response) => {
+        res = await response.json() as APIResponse;
+        status = response.status;
+    });
+
+    return {
+        status: status,
+        ...res
+    } as ExtendedAPIResponse;
+}
+

@@ -23,7 +23,6 @@
 		<Field label="Name" type="text" placeholder="ex: Assignment 1 Peer Review" value={''} />
 		<Select label="Template" placeholder="Choose from a template" fetchOptions={getStudents}/>
 		<Datepicker label="Due Date" placeholder="" value={''} />
-		<Select label="Students" placeholder="Search for a student" fetchOptions={getStudents}/>
 		<Button onClick={onSubmit} action="Create Peer Review" animation={false} />
 	</Form>
 </template>

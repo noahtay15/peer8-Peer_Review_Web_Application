@@ -69,7 +69,6 @@ export async function POST({ request, locals }: { request: Request, locals: any 
         const newClass = await prisma.classes.create({
             data: {
                 name,
-                code: generateClassCode(7),
                 instructor_id: instructor_id,
             }
         });
@@ -116,15 +115,4 @@ export async function POST({ request, locals }: { request: Request, locals: any 
         return json({ message: 'Error creating class.'}, { status: 500 });
     }
 }
-
-
-function generateClassCode(length: number) {
-    const chars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7', '8', '9'];
-    let code = '';
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * chars.length);
-      code += chars[randomIndex];
-    }
-    return code;
-  }
   

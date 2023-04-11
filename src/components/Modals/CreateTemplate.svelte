@@ -9,6 +9,7 @@
 	let templateName = '';
 
 	export let onSubmit = async () => {};
+	let error = '';
 
 	const create = async () => {
 
@@ -25,15 +26,25 @@
             let r = res as ExtendedAPIResponse;
             if (r.status === 201) {
                 onSubmit();
-            }
+            } else {
+				error = r.message;
+			}
         });
 	};
 </script>
 
 <template>
+	<h1 class="error">{error}</h1>
 	<Form>
 		<Field label="Name" type="text" placeholder="ex: Basic Rubric v1.0" bind:value={templateName} />
 		<QuestionCreator bind:questions />
 		<Button onClick={create} action="Create Template" animation={false} />
 	</Form>
 </template>
+
+
+<style>
+	.error {
+		@apply text-red-500 mt-4;
+	}
+</style>

@@ -12,20 +12,20 @@ model users {
   name                    String                    @db.VarChar(255)
   email                   String                    @unique @db.VarChar(255)
   type                    String                    @db.VarChar(255)
+  created_at              DateTime                  @default(now())
+  last_updated            DateTime                  @default(now())
   classes                 classes[]
   class_students          class_students[]
   peer_review_submissions peer_review_submissions[]
   peer_review_assignments peer_review_assignments[]
   templates               templates[]
-  created_at              DateTime                  @default(now())
-  last_updated            DateTime                  @default(now())
+  peer_review_responses   peer_review_responses[]
 }
 
 model classes {
   id             Int              @id @default(autoincrement())
   instructor_id  Int
   name           String           @db.VarChar(255)
-  code           String           @db.VarChar(255)
   created_at     DateTime         @default(now())
   last_updated   DateTime         @default(now())
   users          users            @relation(fields: [instructor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_instructor_id")
@@ -48,8 +48,8 @@ model templates {
   max_points   Int
   created_at   DateTime    @default(now())
   last_updated DateTime    @default(now())
-  questions    questions[]
   creator_id   Int
+  questions    questions[]
   creator      users       @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_creator_id")
 }
 
@@ -61,6 +61,7 @@ model questions {
   created_at   DateTime  @default(now())
   last_updated DateTime  @default(now())
   templates    templates @relation(fields: [template_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_template_id")
+  responses    peer_review_responses[]
 }
 
 model peer_reviews {
@@ -68,6 +69,7 @@ model peer_reviews {
   class_id                Int
   name                    String                    @db.VarChar(255)
   description             String?
+  due_date                DateTime?
   created_at              DateTime                  @default(now())
   last_updated            DateTime                  @default(now())
   classes                 classes                   @relation(fields: [class_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_class_id_2")
@@ -82,11 +84,28 @@ model peer_review_assignments {
   final_score             Int?                      @default(0)
   created_at              DateTime                  @default(now())
   last_updated            DateTime                  @default(now())
+  comments                String?
   peer_reviews            peer_reviews              @relation(fields: [peer_review_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_peer_review_id")
   users                   users                     @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_student_id_2")
   peer_review_submissions peer_review_submissions[]
   groups                  groups[]
+  peer_review_responses   peer_review_responses[]
 }
+
+model peer_review_responses {
+  id                     Int                 @id @default(autoincrement())
+  peer_review_assignment_id Int
+  question_id            Int
+  student_id             Int
+  score                  Int?
+  comments               String?
+  created_at             DateTime            @default(now())
+  last_updated           DateTime            @default(now())
+  student                users               @relation(fields: [student_id], references: [id])
+  question               questions           @relation(fields: [question_id], references: [id])
+  peer_review_assignment peer_review_assignments @relation(fields: [peer_review_assignment_id], references: [id])
+}
+
 
 model groups {
   id                        Int                     @id @default(autoincrement())

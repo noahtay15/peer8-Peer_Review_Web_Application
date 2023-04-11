@@ -35,6 +35,9 @@
 	let user_classes: Class[] = [];
 	let user_templates: any[] = [];
 
+	let classesLoaded = false;
+	let templatesLoaded = false;
+
 	const retry = async () => {
 		await getUser(localStorage.getItem('token') || '', localStorage.getItem('id_token') || '').then(
 			async (res) => {
@@ -55,6 +58,33 @@
 			let d = res.data as AuthenticationResultType;
 			localStorage.setItem('token', d.AccessToken || '');
 			localStorage.setItem('id_token', d.IdToken || '');
+		});
+	};
+
+	const refresh_classes = async () => {
+		await getClasses(
+			localStorage.getItem('token') || '',
+			localStorage.getItem('id_token') || '',
+			0
+		).then(async (res) => {
+			let r = res as ExtendedAPIResponse;
+			let dat = r.data as ClassData;
+			user_classes = dat.classes as Class[];
+			classesLoaded = true;
+		});
+	};
+
+	const refresh_templates = async () => {
+		await getTemplates(
+			localStorage.getItem('token') || '',
+			localStorage.getItem('id_token') || '',
+			0
+		).then(async (res) => {
+			let r = res as ExtendedAPIResponse;
+			let dat = r.data;
+			user_templates = dat as any[];
+
+			templatesLoaded = true;
 		});
 	};
 
@@ -80,39 +110,14 @@
 			}
 		);
 
-		await getClasses(
-			localStorage.getItem('token') || '',
-			localStorage.getItem('id_token') || '',
-			0
-		).then(async (res) => {
-			let r = res as ExtendedAPIResponse;
-			let dat = r.data as ClassData;
-			user_classes = dat.classes as Class[];
-		});
+		refresh_classes();
 
-		await getTemplates(
-			localStorage.getItem('token') || '',
-			localStorage.getItem('id_token') || '',
-			0
-		).then(async (res) => {
-			let r = res as ExtendedAPIResponse;
-			let dat = r.data;
-			user_templates = dat as any[];
-		});
-
-		
 		user.subscribe(async (user) => {
 			console.log(user);
 		});
 
 		if ($user.type?.toLowerCase() === 'instructor') {
-			await getTemplates(
-				localStorage.getItem('token') || '',
-				localStorage.getItem('id_token') || '',
-				0
-			).then(async (res) => {
-				console.log(res);
-			});
+			refresh_templates();
 		}
 	});
 
@@ -136,28 +141,12 @@
 			title: 'Create a Class',
 			content: $user.type?.toLowerCase() === 'instructor' ? CreateClass : AddClass,
 			onSubmit: () => {
-				console.log('Form submitted!');
 				closeModal('addClass');
+				refresh_classes();
 			},
 			onClose: () => {
 				console.log('Modal closed!');
 				closeModal('addClass');
-			}
-		});
-	};
-
-	const addPeerReview = () => {
-		openModal({
-			id: 'addPeerReview',
-			title: 'Create a New Peer Review',
-			content: PeerReview,
-			onSubmit: () => {
-				console.log('Form submitted!');
-				closeModal('addPeerReview');
-			},
-			onClose: () => {
-				console.log('Modal closed!');
-				closeModal('addPeerReview');
 			}
 		});
 	};
@@ -169,6 +158,7 @@
 			content: CreateTemplate,
 			onSubmit: () => {
 				closeModal('addTemplate');
+				refresh_templates();
 			},
 			onClose: () => {
 				console.log('Modal closed!');
@@ -216,23 +206,59 @@
 			</div>
 			<!-- Nav groups for sidebar -->
 			<NavGroup category="Classes" searchable onAdd={addClass}>
-				{#each user_classes as cl}
-					<NavItem
-						href={`/class/${cl.id}`}
-						active={data.pathname === `/class/${cl.id}`}
-						className="Class"
-					/>
-				{/each}
+				{#if !classesLoaded}
+					<svg
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6 animate-spin text-primary"
+					>
+						<path
+							d="M23 13C23 10.6266 22.3472 8.30655 21.1243 6.33316C19.9013 4.35977 18.163 2.8217 16.1293 1.91345C14.0956 1.0052 11.8577 0.76756 9.69871 1.23058C7.53972 1.6936 5.55655 2.83649 4 4.51472"
+							stroke="#112E51"
+							stroke-linecap="round"
+						/>
+					</svg>
+				{:else}
+					{#each user_classes as cl}
+						<NavItem
+							href={`/class/${cl.id}`}
+							active={data.pathname === `/class/${cl.id}`}
+							className={cl.name}
+						/>
+					{/each}
+				{/if}
 			</NavGroup>
 			{#if $user.type?.toLowerCase() === 'instructor'}
 				<NavGroup category="Templates" searchable onAdd={addTemplate}>
-					{#each user_templates as template}
-						<NavItem
-							href={`/template/${template.id}`}
-							active={data.pathname === `/template/${template.id}`}
-							className="Template"
-						/>
-					{/each}
+					<!-- Loading icon-->
+					{#if !templatesLoaded}
+						<svg
+							width="24"
+							height="24"
+							viewBox="0 0 24 24"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-6 w-6 animate-spin text-primary"
+						>
+							<path
+								d="M23 13C23 10.6266 22.3472 8.30655 21.1243 6.33316C19.9013 4.35977 18.163 2.8217 16.1293 1.91345C14.0956 1.0052 11.8577 0.76756 9.69871 1.23058C7.53972 1.6936 5.55655 2.83649 4 4.51472"
+								stroke="#112E51"
+								stroke-linecap="round"
+							/>
+						</svg>
+					{:else}
+						{#each user_templates as template}
+							<NavItem
+								href={`/template/${template.id}`}
+								active={data.pathname === `/template/${template.id}`}
+								className={template.name}
+								icon="other"
+							/>
+						{/each}
+					{/if}
 				</NavGroup>
 			{/if}
 		</div>
@@ -290,23 +316,63 @@
 					<!-- Sidebar stuff but actually column stuff for mobile, navigation -->
 					<div class="w-full">
 						<NavGroup category="Classes" searchable onAdd={addClass}>
-							{#each user_classes as cl}
-								<NavItem
-									href={`/class/${cl.id}`}
-									active={data.pathname === `/class/${cl.id}`}
-									className="Class"
-								/>
-							{/each}
+							{#if !classesLoaded}
+								<svg
+									width="24"
+									height="24"
+									viewBox="0 0 24 24"
+									fill="none"
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-6 w-6 animate-spin text-primary"
+								>
+									<path
+										d="M23 13C23 10.6266 22.3472 8.30655 21.1243 6.33316C19.9013 4.35977 18.163 2.8217 16.1293 1.91345C14.0956 1.0052 11.8577 0.76756 9.69871 1.23058C7.53972 1.6936 5.55655 2.83649 4 4.51472"
+										stroke="#112E51"
+										stroke-linecap="round"
+									/>
+								</svg>
+							{:else}
+								{#each user_classes as cl}
+									<NavItem
+										href={`/class/${cl.id}`}
+										active={data.pathname === `/class/${cl.id}`}
+										className={cl.name}
+									/>
+								{/each}
+							{/if}
 						</NavGroup>
 					</div>
 					<div class="w-full">
-						<NavGroup category="Templates" searchable onAdd={addTemplate}>
-							<NavItem
-								href="/template/1"
-								active={data.pathname === '/template/1'}
-								className="Template"
-							/>
-						</NavGroup>
+						{#if $user.type?.toLowerCase() === 'instructor'}
+							<NavGroup category="Templates" searchable onAdd={addTemplate}>
+								<!-- Loading icon-->
+								{#if !templatesLoaded}
+									<svg
+										width="24"
+										height="24"
+										viewBox="0 0 24 24"
+										fill="none"
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-6 w-6 animate-spin text-primary"
+									>
+										<path
+											d="M23 13C23 10.6266 22.3472 8.30655 21.1243 6.33316C19.9013 4.35977 18.163 2.8217 16.1293 1.91345C14.0956 1.0052 11.8577 0.76756 9.69871 1.23058C7.53972 1.6936 5.55655 2.83649 4 4.51472"
+											stroke="#112E51"
+											stroke-linecap="round"
+										/>
+									</svg>
+								{:else}
+									{#each user_templates as template}
+										<NavItem
+											href={`/template/${template.id}`}
+											active={data.pathname === `/template/${template.id}`}
+											className={template.name}
+											icon="other"
+										/>
+									{/each}
+								{/if}
+							</NavGroup>
+						{/if}
 					</div>
 				</div>
 			{/if}
@@ -347,6 +413,7 @@
 		@apply flex flex-col lg:flex-row h-screen;
 	}
 
+	
 	@media (min-width: 1024px) {
 		.main {
 			@apply h-auto;

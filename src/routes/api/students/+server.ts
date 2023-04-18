@@ -6,19 +6,19 @@ export async function GET({ locals, url }) {
 	const page: string | null = decodeURIComponent(url.searchParams.get('page') || '');
 
 	// Get class
-	const classId: string | null = decodeURIComponent(url.searchParams.get('classId') || '');
+	const class_id: string | null = decodeURIComponent(url.searchParams.get('class_id') || '');
 
 	// Sanitize email and code parameters
 	const sanitizedPage: number = page ? parseInt(page.trim()) : 0;
 
 	// Sanitize classId
-	const sanitizedClassId: number = classId ? parseInt(classId.trim()) : 0;
+	const sanitizedClassId: number = class_id ? parseInt(class_id.trim()) : 0;
 
 	const errors: string[] = [];
 
 	// Validate body
-	if (!classId) {
-		errors.push('Missing classId.');
+	if (!class_id) {
+		errors.push('Missing class_id.');
 	}
 
 	if (errors.length > 0) {

@@ -115,7 +115,13 @@ export async function GET({ locals, url }: { locals: App.Locals; url: URL }) {
 			},
 		});
 
-		return json({ message: 'Retrieved templates successfully.', data: templates }, { status: 200 });
+		const count = await prisma.templates.count({
+			where: {
+				creator_id: user.id as number
+			}
+		});
+
+		return json({ message: 'Retrieved templates successfully.', data: templates, length: templates.length, count, pages: Math.ceil(count / 20)  }, { status: 200 });
 	} catch (error) {
 		return json({ message: 'Error retrieving templates.', error }, { status: 500 });
 	}

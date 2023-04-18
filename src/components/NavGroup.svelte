@@ -5,6 +5,7 @@
 	export let searchable = false;
 	export let addable = true;
 	export let onAdd = () => {};
+	export let onSearch = (e: any) => {};
 </script>
 
 <div class="comp">
@@ -21,7 +22,7 @@
 			{#if searchable}
 				<div class="nav-group-search">
 					<SearchIcon class="absolute w-5 h-5 top-[.6rem] left-3" />
-					<input class="nav-group-search-input" type="text" placeholder="Search" />
+					<input class="nav-group-search-input" type="text" placeholder="Search" on:input={onSearch} />
 				</div>
 			{/if}
 		</div>

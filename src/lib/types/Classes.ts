@@ -1,6 +1,5 @@
 export interface Class {
     id: number;
-    code: string;
     name: string;
     updated_at: Date;
     created_at: Date;
@@ -13,7 +12,9 @@ export interface ClassData {
 }
 
 export interface Student {
-    email: string;
+    "Email": string;
+    "First Name": string;
+    "Last Name": string;
 }
 
 

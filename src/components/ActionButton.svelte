@@ -85,6 +85,6 @@
 	}
 
 	.btn {
-		@apply bg-secondary text-primary text-base font-normal px-12 rounded w-full relative overflow-hidden;
+		@apply bg-secondary text-primary text-base font-normal px-12 h-12 rounded w-full relative overflow-hidden;
 	}
 </style>

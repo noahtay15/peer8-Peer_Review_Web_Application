@@ -138,13 +138,13 @@
 			validator={validateConfirm}
 		/>
 		<Switch options={['Student', 'Instructor']} bind:selectedOption={userType} />
-		<Field
+		<!-- <Field
 			err_message={classCodeError}
 			placeholder="ex: A52E1AE"
 			label="Class Code (optional)"
 			type="text"
 			bind:value={classCode}
-		/>
+		/> -->
 		<Button action="Sign Up" />
 	</Form>
 </div>

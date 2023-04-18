@@ -19,17 +19,18 @@
 	};
 
 	onMount(() => {
-		console.log(href);
 	});
 </script>
 
 <div class="comp">
 	<div class="nav-item" class:nav-active={active} on:click={navigate} on:keyup={navigate}>
-		{#if icon === 'grad'}
-			<FontAwesomeIcon icon={faGraduationCap} size="lg" class="mr-3" />
-		{:else}
-			<FontAwesomeIcon icon={faFileAlt} size="lg" class="mr-3" />
-		{/if}
+		<div class="text-secondary">
+			{#if icon === 'grad'}
+				<FontAwesomeIcon icon={faGraduationCap} size="lg" class="mr-3" />
+			{:else}
+				<FontAwesomeIcon icon={faFileAlt} size="lg" class="mr-3" />
+			{/if}
+		</div>
 
 		<p>{className}</p>
 	</div>

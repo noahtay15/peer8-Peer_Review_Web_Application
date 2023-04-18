@@ -22,18 +22,31 @@ export async function POST({ request, locals }: { request: Request, locals: any 
 
     let invalidEmail = false;
     for (const student of students) {
-        if (!student.email) {
+        if (!student.Email) {
             errors.push('Please provide a name and email for each student.');
             break;
         }
 
-        if (!emailRegex.test(student.email)) {
+        if (!emailRegex.test(student.Email)) {
             invalidEmail = true;
+        }
+
+        if (!student['First Name'] || !student['Last Name']) {
+            errors.push('Please provide a name and email for each student.');
+            break;
         }
     }
 
     if (invalidEmail) {
         errors.push('Please provide a valid email for each student.');
+    }
+
+    // Check for duplicate emails
+    const emails = students.map(student => student.Email);
+    const uniqueEmails = [...new Set(emails)];
+
+    if (emails.length !== uniqueEmails.length) {
+        errors.push('Please provide unique emails for each student.');
     }
 
     if (errors.length > 0) {
@@ -77,7 +90,7 @@ export async function POST({ request, locals }: { request: Request, locals: any 
         for (const student of students) {
             const existingUser = await prisma.users.findUnique({
                 where: {
-                    email: student.email
+                    email: student.Email
                 }
             });
 
@@ -94,9 +107,9 @@ export async function POST({ request, locals }: { request: Request, locals: any 
                 // User does not exist, create new user
                 const newUser = await prisma.users.create({
                     data: {
-                        email: student.email,
+                        email: student.Email,
                         type: "student",
-                        name: ""
+                        name: `${student['First Name']} ${student['Last Name']}`
                     }
                 });
 
@@ -115,4 +128,48 @@ export async function POST({ request, locals }: { request: Request, locals: any 
         return json({ message: 'Error creating class.'}, { status: 500 });
     }
 }
-  
+
+export async function GET({ locals, url }: { locals: App.Locals, url: URL }) {
+    const prisma = locals.prisma as PrismaClient;
+    
+    // Get URL params
+    const class_id: string | null = decodeURIComponent(url.searchParams.get('class_id') || '');
+
+    // Sanitize parameters
+    const sanitizedClassId: number = class_id ? parseInt(class_id.trim()) : 0;
+
+    if (!sanitizedClassId) {
+        return json({ message: "Missing or invalid class_id." }, { status: 400 });
+    }
+
+    try {
+        const classInfo = await prisma.classes.findUnique({
+            where: {
+                id: sanitizedClassId,
+            },
+            /*include: {
+                class_students: {
+                    select: {
+                        student_id: true,
+                        users: {
+                            select: {
+                                id: true,
+                                email: true,
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },*/
+        });
+
+        if (!classInfo) {
+            return json({ message: "Class not found." }, { status: 404 });
+        }
+
+        return json({ message: 'Successfully retrieved class information.', data: classInfo }, { status: 200 });
+    } catch (error) {
+        console.error(error);
+        return json({ message: 'Error retrieving class information.' }, { status: 500 });
+    }
+}

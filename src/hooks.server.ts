@@ -52,7 +52,6 @@ export async function handle({ event, resolve }: { event: any, resolve: any }) {
 
             claims = payload2;
         } catch (err) {
-            console.log(err)
             return json({ message: 'Invalid tokens provided.' }, { status: 401 });
         }
     }

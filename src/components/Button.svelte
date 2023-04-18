@@ -10,6 +10,7 @@
 
 	export let animation: boolean = true;
 	export let transition: boolean = false;
+	export let deleteAction: boolean = false;
 	let isAnimating = false;
 	let isLoading = false;
 
@@ -33,7 +34,7 @@
 
 {#if transition}
 <div class={`comp ${classNames}`} out:fade={{ duration: 500 }} in:fade={{ duration: 500}}>
-	<button class="btn animating h-12 outline-none" on:click={handleClick}>
+	<button class="btn animating h-12 outline-none" on:click={handleClick} class:bg-primary={!deleteAction}>
 		{#if isLoading && animation}
 			<svg
 				width="24"
@@ -56,7 +57,7 @@
 </div>
 {:else}
 <div class={`comp ${classNames}`}>
-	<button class="btn animating h-12 outline-none" on:click={handleClick}>
+	<button class="btn animating h-12 outline-none" on:click={handleClick} class:bg-primary={!deleteAction}>
 		{#if isLoading && animation}
 			<svg
 				width="24"
@@ -85,6 +86,6 @@
 	}
 
 	.btn {
-		@apply bg-primary text-white text-base font-normal py-3 px-4 rounded w-full relative overflow-hidden;
+		@apply h-12 text-white text-base font-normal px-12 rounded w-full relative overflow-hidden;
 	}
 </style>

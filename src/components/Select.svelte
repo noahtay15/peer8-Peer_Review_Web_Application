@@ -133,6 +133,7 @@
 										removeOption(option);
 									} else {
 										selectOption(option);
+										svalue = value;
 									}
 								}}
 								class:selected-dropdown-option={states[option] && multiSelect}
@@ -147,17 +148,6 @@
 				{/each}
 			</div>
 		{/if}
-
-		<!-- <div class="selected-options-container">
-			{#each value as option}
-				<div class="selected-option">
-					<span class="selected-option-text">{option.label || option}</span>
-					<button class="remove-selected-option" on:click={() => removeOption(option)}>
-						<TrashIcon />
-					</button>
-				</div>
-			{/each}
-		</div> -->
 	</div>
 	{#if !valid}
 		<p class="error">{err_message}</p>

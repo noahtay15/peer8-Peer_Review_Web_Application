@@ -1,0 +1,18 @@
+{
+    "assignment_id": 1,
+	"responses": [{
+        "question_id": 1,
+        "scores": [
+            {
+                "student_id": 1,
+                "score": 5,
+                "comment": "Good job!"
+            },
+            {
+                "student_id": 1,
+                "score": 5,
+                "comment": "Good job!"
+            }
+        ]
+    }]
+}

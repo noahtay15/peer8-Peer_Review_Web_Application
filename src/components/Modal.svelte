@@ -76,7 +76,8 @@
 	}
 
 	.modal-content {
-		@apply px-2
+		@apply px-2;
+		min-width: 350px;
 	}
 
 	.modal-header h1 {

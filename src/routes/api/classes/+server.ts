@@ -55,7 +55,6 @@ async function getInstructorClassData(prisma: PrismaClient, email: string, page:
         const classObj: Class = {
             id: class_data.id,
             name: class_data.name,
-            code: class_data.code,
             created_at: class_data.created_at,
             updated_at: class_data.last_updated,
         };
@@ -123,7 +122,6 @@ async function getStudentClassData(prisma: PrismaClient, email: string, page: nu
           select: {
             id: true,
             name: true,
-            code: true,
             created_at: true,
             last_updated: true,
           },
@@ -136,7 +134,6 @@ async function getStudentClassData(prisma: PrismaClient, email: string, page: nu
         const classObj: Class = {
             id: class_student.classes.id,
             name: class_student.classes.name,
-            code: class_student.classes.code,
             created_at: class_student.classes.created_at,
             updated_at: class_student.classes.last_updated,
         };

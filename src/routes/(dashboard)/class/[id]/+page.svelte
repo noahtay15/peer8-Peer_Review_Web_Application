@@ -5,10 +5,18 @@
     import { onMount } from 'svelte';
     import { user } from '$lib/stores/user';
 	import { goto } from '$app/navigation';
+	import { getClassInfo } from '$lib/api/api';
+	import { page } from '$app/stores';
+    import {className} from '$lib/stores/info';
 
     // TODO: Pull class data by id
     onMount(async () => {
-        //goto('/class/1/review/1');
+        await getClassInfo(parseInt($page.params.id)).then((res) => {
+            let r = res.data as any;
+            if (r) {
+                className.name = r.name;
+            }
+        });
     });
 </script>
 

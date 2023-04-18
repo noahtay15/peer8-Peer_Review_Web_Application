@@ -39,7 +39,7 @@
 	let templatesLoaded = false;
 
 	const retry = async () => {
-		await getUser(localStorage.getItem('token') || '', localStorage.getItem('id_token') || '').then(
+		await getUser().then(
 			async (res) => {
 				let r = res as ExtendedAPIResponse;
 
@@ -54,7 +54,7 @@
 	};
 
 	const refresh = async () => {
-		await refreshUser(localStorage.getItem('refresh_token') || '').then(async (res) => {
+		await refreshUser().then(async (res) => {
 			let d = res.data as AuthenticationResultType;
 			localStorage.setItem('token', d.AccessToken || '');
 			localStorage.setItem('id_token', d.IdToken || '');
@@ -63,8 +63,6 @@
 
 	const refresh_classes = async () => {
 		await getClasses(
-			localStorage.getItem('token') || '',
-			localStorage.getItem('id_token') || '',
 			0
 		).then(async (res) => {
 			let r = res as ExtendedAPIResponse;
@@ -76,8 +74,6 @@
 
 	const refresh_templates = async () => {
 		await getTemplates(
-			localStorage.getItem('token') || '',
-			localStorage.getItem('id_token') || '',
 			0
 		).then(async (res) => {
 			let r = res as ExtendedAPIResponse;
@@ -88,9 +84,27 @@
 		});
 	};
 
+	$: filteredUserClasses = user_classes;
+	$: filteredUserTemplates = user_templates;
+
+	const onSearch = (e) => {
+		console.log(e);
+		const searchText = e.target.value.toLowerCase();
+		filteredUserClasses = user_classes.filter((cl) =>
+			cl.name.toLowerCase().includes(searchText)
+		);
+	};
+
+	const onSearchTemplates = (e) => {
+		console.log(e);
+		const searchText = e.target.value.toLowerCase();
+		filteredUserTemplates = user_templates.filter((t)=> t.name.toLowerCase().includes(searchText));
+		console.log(user_templates);
+	};
+
 	onMount(async () => {
 		// TODO: Call API to get user data
-		await getUser(localStorage.getItem('token') || '', localStorage.getItem('id_token') || '').then(
+		await getUser().then(
 			async (res) => {
 				let r = res as ExtendedAPIResponse;
 
@@ -123,13 +137,10 @@
 
 	function toggleNav() {
 		navIsOpen = !navIsOpen;
-		console.log(navIsOpen);
 	}
 
 	const openModal = (data: any) => {
 		modals = [...modals, data];
-
-		console.log(modals);
 	};
 	const closeModal = (modalId: any) => {
 		modals = modals.filter((modal: any) => modal.id !== modalId);
@@ -145,7 +156,6 @@
 				refresh_classes();
 			},
 			onClose: () => {
-				console.log('Modal closed!');
 				closeModal('addClass');
 			}
 		});
@@ -161,7 +171,6 @@
 				refresh_templates();
 			},
 			onClose: () => {
-				console.log('Modal closed!');
 				closeModal('addTemplate');
 			}
 		});
@@ -205,7 +214,7 @@
 				</div>
 			</div>
 			<!-- Nav groups for sidebar -->
-			<NavGroup category="Classes" searchable onAdd={addClass}>
+			<NavGroup category="Classes" searchable onAdd={addClass} {onSearch}>
 				{#if !classesLoaded}
 					<svg
 						width="24"
@@ -222,7 +231,7 @@
 						/>
 					</svg>
 				{:else}
-					{#each user_classes as cl}
+					{#each filteredUserClasses as cl}
 						<NavItem
 							href={`/class/${cl.id}`}
 							active={data.pathname === `/class/${cl.id}`}
@@ -232,7 +241,7 @@
 				{/if}
 			</NavGroup>
 			{#if $user.type?.toLowerCase() === 'instructor'}
-				<NavGroup category="Templates" searchable onAdd={addTemplate}>
+				<NavGroup category="Templates" searchable onAdd={addTemplate} onSearch={onSearchTemplates}>
 					<!-- Loading icon-->
 					{#if !templatesLoaded}
 						<svg
@@ -250,7 +259,7 @@
 							/>
 						</svg>
 					{:else}
-						{#each user_templates as template}
+						{#each filteredUserTemplates as template}
 							<NavItem
 								href={`/template/${template.id}`}
 								active={data.pathname === `/template/${template.id}`}
@@ -332,7 +341,7 @@
 									/>
 								</svg>
 							{:else}
-								{#each user_classes as cl}
+								{#each filteredUserClasses as cl}
 									<NavItem
 										href={`/class/${cl.id}`}
 										active={data.pathname === `/class/${cl.id}`}
@@ -362,7 +371,7 @@
 										/>
 									</svg>
 								{:else}
-									{#each user_templates as template}
+									{#each filteredUserTemplates as template}
 										<NavItem
 											href={`/template/${template.id}`}
 											active={data.pathname === `/template/${template.id}`}

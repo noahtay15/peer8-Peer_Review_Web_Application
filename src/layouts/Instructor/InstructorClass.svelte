@@ -1,12 +1,21 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import ActionButton from '$components/ActionButton.svelte';
 	import Modal from '$components/Modal.svelte';
 	import PeerReview from '$components/Modals/CreatePeerReview.svelte';
+	import Pagination from '$components/Pagination.svelte';
 	import TabContent from '$components/TabContent.svelte';
 	import Table from '$components/Table.svelte';
 	import Tabs from '$components/Tabs.svelte';
 	import { getPeerReviews, getStudents } from '$lib/api/api';
 	import { onMount } from 'svelte';
+	import { className } from '$lib/stores/info';
+	import DeleteStudent from '$components/Modals/DeleteStudent.svelte';
+	import EditPeerReview from '$components/Modals/EditPeerReview.svelte';
+	import ClosePeerReview from '$components/Modals/ClosePeerReview.svelte';
+	import Button from '$components/Button.svelte';
+	import AddStudent from '$components/Modals/AddStudent.svelte';
 
 	let tabs = [
 		{
@@ -71,13 +80,16 @@
 
 	let modals: any = [];
 	let currentTab = 0;
-	let currentPage = 0;
-	let totalPages = 0;
+
+	// Pages
+	let currentPageStudents = 0;
+	let totalPagesStudents = 0;
+
+	let currentPageReviews = 0;
+	let totalPagesReviews = 0;
 
 	const openModal = (data: any) => {
 		modals = [...modals, data];
-
-		console.log(modals);
 	};
 
 	const closeModal = (modalId: any) => {
@@ -85,9 +97,9 @@
 	};
 
 	const fetchStudents = async (page: number) => {
-		await getStudents(localStorage.getItem('token') || '', localStorage.getItem('id_token') || '', {
-			page,
-			classId: 1
+		await getStudents({
+			class_id: $page.params.id,
+			page
 		}).then((res) => {
 			let r = res as any;
 			if (r.status === 200) {
@@ -97,31 +109,40 @@
 						email: student.email,
 						actions: {
 							delete: {
-								label: 'Remove',
+								label: 'Delete',
 								onClick: (row: any) => {
-									console.log(`Deleting ${row.name}`);
+									openModal({
+										id: 'deleteStudent',
+										title: 'Delete Student',
+										content: DeleteStudent,
+										onSubmit: async () => {
+											await fetchStudents(currentPageStudents);
+											closeModal('deleteStudent');
+										},
+										onClose: () => {
+											closeModal('deleteStudent');
+										},
+										props: {
+											student_id: student.id,
+										}
+									});
 								}
 							}
 						}
 					};
 				});
-				currentPage = page;
-				totalPages = r.data.pages;
+				currentPageStudents = page;
+				totalPagesStudents = r.data.pages;
 			} else {
-				console.log(r.message);
 			}
 		});
 	};
 
-	const fetchPeerReviews = async () => {
-		console.log("hi")
-		await getPeerReviews(
-			localStorage.getItem('token') || '',
-			localStorage.getItem('id_token') || '',
-			{
-				classId: 1
-			}
-		).then((res) => {
+	const fetchPeerReviews = async (page: number) => {
+		await getPeerReviews({
+			class_id: $page.params.id,
+			page
+		}).then((res) => {
 			let r = res as any;
 			if (r.status === 200) {
 				tabs[0].props.data = r.data.peer_reviews.map((pr: any) => {
@@ -130,117 +151,194 @@
 						date: new Date(pr.due_date).toLocaleDateString(),
 						status: pr.status,
 						actions: {
-							delete: {
-								label: 'Remove',
+							View: {
+								label: 'View',
 								onClick: (row: any) => {
-									console.log(`Deleting ${row.name}`);
+									goto(`/class/${$page.params.id}/review/${pr.id}`);
+								}
+							},
+							Close: {
+								label: 'Close',
+								onClick: (row: any) => {
+									openModal({
+										id: 'editPeerReview',
+										title: 'Close Peer Review',
+										content: ClosePeerReview,
+										onSubmit: async () => {
+											await fetchPeerReviews(currentPageReviews);
+											closeModal('editPeerReview');
+										},
+										onClose: () => {
+											closeModal('editPeerReview');
+										},
+										props: {
+											review_id: pr.id,
+											review_name: pr.name,
+											due_date: formatDate(new Date(pr.due_date).toLocaleDateString())
+										}
+									});
+								}
+							},
+							Edit: {
+								label: 'Edit',
+								onClick: (row: any) => {
+									openModal({
+										id: 'editPeerReview',
+										title: 'Edit Peer Review',
+										content: EditPeerReview,
+										onSubmit: async () => {
+											closeModal('editPeerReview');
+										},
+										onClose: () => {
+											closeModal('editPeerReview');
+										},
+										props: {
+											review_id: pr.id,
+											review_name: pr.name,
+											due_date: formatDate(new Date(pr.due_date).toLocaleDateString())
+										}
+									});
 								}
 							}
 						}
 					};
 				});
-				
-				console.log(r.data.peer_reviews);
+				currentPageReviews = page;
+				totalPagesReviews = r.data.pages;
 			} else {
-				console.log(r.message);
 			}
 		});
 	};
 
 	const nextPage = () => {
-		if (currentPage < totalPages - 1) {
-			fetchStudents(currentPage + 1);
+		if (currentPageStudents < totalPagesStudents - 1) {
+			fetchStudents(currentPageStudents + 1);
+		}
+
+		if (currentPageReviews < totalPagesReviews - 1) {
+			fetchPeerReviews(currentPageReviews + 1);
 		}
 	};
 
 	const prevPage = () => {
-		if (currentPage > 0) {
-			fetchStudents(currentPage - 1);
+		if (currentPageStudents > 0) {
+			fetchStudents(currentPageStudents - 1);
+		}
+
+		if (currentPageReviews > 0) {
+			fetchPeerReviews(currentPageReviews - 1);
 		}
 	};
 
+	function formatDate(dateString) {
+		const date = new Date(dateString);
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const day = String(date.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	}
+
 	onMount(async () => {
-		await fetchStudents(currentPage);
-		await fetchPeerReviews();
+		await fetchStudents(currentPageStudents);
+		await fetchPeerReviews(currentPageReviews);
 	});
 </script>
 
-<div>
-	<h1 class="page-heading">Mock Class</h1>
-	<div class="flex flex-col md:flex-row">
-		<h2 class="subheading">Peer Reviews</h2>
-		<ActionButton
-			action="Create a New Peer Review"
-			onClick={async () =>
-				openModal({
-					id: 'addPeerReview',
-					title: 'Create a New Peer Review',
-					content: PeerReview,
-					onSubmit: () => {
-						console.log('Form submitted!');
-						closeModal('addPeerReview');
-					},
-					onClose: () => {
-						console.log('Modal closed!');
-						closeModal('addPeerReview');
-					}
-				})}
-			animation={false}
-			classNames="md:ml-auto md:self-center md:pt-8"
-		/>
-	</div>
-	<Tabs bind:currentTab {tabs}>
-		<TabContent index={0} current={currentTab}>
-			<div class="flex flex-col">
-				<div class="flex space-x-2 mt-10">
-					<button
-						class={`${
-							currentPage === 0 ? 'bg-inactive' : 'bg-primary'
-						} text-white font-light py-2 w-32 rounded`}
-						on:click={prevPage}
-						disabled={currentPage === 0}
-					>
-						Previous
-					</button>
-					<button
-						class={`${
-							currentPage === totalPages - 1 ? 'bg-inactive' : 'bg-primary'
-						} text-white font-light py-2 w-32 rounded`}
-						on:click={nextPage}
-						disabled={currentPage === totalPages - 1}
-					>
-						Next
-					</button>
-				</div>
-				<Table {...tabs[0].props} />
-				<br />
+<!--
+
+	<div class="md:ml-auto md:w-96">
+				<ActionButton
+					action="Add a Student"
+					onClick={async () =>
+						openModal({
+							id: 'addPeerReview',
+							title: 'Add a Student',
+							content: PeerReview,
+							onSubmit: async () => {
+								await fetchPeerReviews(currentPageReviews);
+								closeModal('addPeerReview');
+							},
+							onClose: () => {
+								closeModal('addPeerReview');
+							}
+						})}
+					animation={false}
+					classNames="md:ml-auto md:self-center"
+				/>
 			</div>
+-->
+
+<div>
+	<h1 class="page-heading">{className.name}</h1>
+	<Tabs
+		bind:currentTab
+		{tabs}
+		actionButtons={[
+			{
+				component: ActionButton,
+				tab: 0,
+				props: {
+					action: 'Create a New Peer Review',
+					onClick: () => {
+						openModal({
+							id: 'addPeerReview',
+							title: 'Create a New Peer Review',
+							content: PeerReview,
+							onSubmit: async () => {
+								await fetchPeerReviews(currentPageReviews);
+								closeModal('addPeerReview');
+							},
+							onClose: () => {
+								closeModal('addPeerReview');
+							}
+						});
+					},
+					animation: false,
+					classNames: 'md:w-96'
+				}
+			},
+			{
+				component: ActionButton,
+				tab: 1,
+				props: {
+					action: 'Add a Student',
+					onClick: () => {
+						openModal({
+							id: 'addStudent',
+							title: 'Add a Student',
+							content: AddStudent,
+							onSubmit: async () => {
+								await fetchStudents(currentPageStudents);
+								closeModal('addStudent');
+							},
+							onClose: () => {
+								closeModal('addStudent');
+							}
+						});
+					},
+					animation: false,
+					classNames: 'md:self-center'
+				}
+			}
+		]}
+	>
+		<TabContent index={0} current={currentTab}>
+			<Pagination
+				currentPage={currentPageReviews}
+				totalPages={totalPagesReviews}
+				{nextPage}
+				{prevPage}
+			/>
+			<Table {...tabs[0].props} />
 		</TabContent>
 		<TabContent index={1} current={currentTab}>
-			<div class="flex flex-col">
-				<div class="flex space-x-2 mt-10">
-					<button
-						class={`${
-							currentPage === 0 ? 'bg-inactive' : 'bg-primary'
-						} text-white font-light py-2 w-32 rounded`}
-						on:click={prevPage}
-						disabled={currentPage === 0}
-					>
-						Previous
-					</button>
-					<button
-						class={`${
-							currentPage === totalPages - 1 ? 'bg-inactive' : 'bg-primary'
-						} text-white font-light py-2 w-32 rounded`}
-						on:click={nextPage}
-						disabled={currentPage === totalPages - 1}
-					>
-						Next
-					</button>
-				</div>
-				<Table {...tabs[1].props} />
-				<br />
-			</div>
+			<Pagination
+				currentPage={currentPageStudents}
+				totalPages={totalPagesStudents}
+				{nextPage}
+				{prevPage}
+			/>
+			<Table {...tabs[1].props} />
 		</TabContent>
 	</Tabs>
 	<div>
@@ -251,6 +349,7 @@
 						this={modal.content}
 						onSubmit={modal.onSubmit}
 						onClose={modal.onClose}
+						{...modal.props}
 					/>
 				{/if}
 			</Modal>

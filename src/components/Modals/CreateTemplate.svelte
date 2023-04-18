@@ -19,8 +19,6 @@
         }
 
 		await createTemplate(
-			localStorage.getItem('token') || '',
-			localStorage.getItem('id_token') || '',
 			data
 		).then((res) => {
             let r = res as ExtendedAPIResponse;

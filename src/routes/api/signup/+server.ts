@@ -2,14 +2,16 @@ import { json } from '@sveltejs/kit';
 import { clientId, userPoolId } from '$lib/aws/constants';
 import type AWS from 'aws-sdk';
 import type { AWSError } from 'aws-sdk';
-import type {
-	AdminDeleteUserRequest,
-	SignUpResponse
-} from 'aws-sdk/clients/cognitoidentityserviceprovider';
+import type { SignUpResponse } from 'aws-sdk/clients/cognitoidentityserviceprovider';
 import type { AWSPromiseResponse } from '$lib/types/AWSResponse';
 import { validateEmail, validatePassword } from '$lib/utils/validate';
 import type { PrismaClient, users } from '@prisma/client';
 import { deleteUser } from '$lib/utils/deleteUser';
+import { directory } from '$lib/aws/directory';
+
+const isEmailInDirectory = (email, dir) => {
+	return dir.some((item) => item.email === email);
+};
 
 export async function POST({ request, locals }) {
 	const body = await request.json();
@@ -34,6 +36,10 @@ export async function POST({ request, locals }) {
 
 	if (type === '' || (type.toLowerCase() !== 'student' && type.toLowerCase() !== 'instructor')) {
 		errors.push('Invalid type provided.');
+	}
+
+	if (!isEmailInDirectory(email, directory.directory) && type.toLowerCase() === 'instructor') {
+		return json({ message: 'You cannot sign up as an instructor with this email. Please contact the administrator.' }, { status: 400 });
 	}
 
 	if (errors.length > 0) {

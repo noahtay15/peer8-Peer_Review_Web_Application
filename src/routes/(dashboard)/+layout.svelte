@@ -37,18 +37,16 @@
 	let templatesLoaded = false;
 
 	const retry = async () => {
-		await getUser().then(
-			async (res) => {
-				let r = res as ExtendedAPIResponse;
+		await getUser().then(async (res) => {
+			let r = res as ExtendedAPIResponse;
 
-				if (r.message.includes('NotAuthorizedException')) {
-					localStorage.removeItem('token');
-					localStorage.removeItem('refresh_token');
-					localStorage.removeItem('id_token');
-					goto('/login');
-				}
+			if (r.message.includes('NotAuthorizedException')) {
+				localStorage.removeItem('token');
+				localStorage.removeItem('refresh_token');
+				localStorage.removeItem('id_token');
+				goto('/login');
 			}
-		);
+		});
 	};
 
 	const refresh = async () => {
@@ -67,9 +65,7 @@
 	let total_template_pages = 0;
 
 	const refresh_classes = async () => {
-		await getClasses(
-			currentClassPage
-		).then(async (res) => {
+		await getClasses(currentClassPage).then(async (res) => {
 			let r = res as ExtendedAPIResponse;
 			let dat = r.data as any;
 
@@ -85,9 +81,7 @@
 
 	const getMore = async () => {
 		++currentClassPage;
-		await getClasses(
-			currentClassPage
-		).then(async (res) => {
+		await getClasses(currentClassPage).then(async (res) => {
 			let r = res as ExtendedAPIResponse;
 			let dat = r.data as ClassData;
 
@@ -96,13 +90,11 @@
 				currentClassPage++;
 			}
 		});
-	}
+	};
 
 	const getMoreTemplate = async () => {
 		++currentTemplatePage;
-		await getTemplates(
-			currentTemplatePage
-		).then(async (res) => {
+		await getTemplates(currentTemplatePage).then(async (res) => {
 			let r = res as ExtendedAPIResponse;
 			let dat = r.data as any;
 
@@ -111,12 +103,10 @@
 				currentTemplatePage++;
 			}
 		});
-	}
+	};
 
 	const refresh_templates = async () => {
-		await getTemplates(
-			currentTemplatePage
-		).then(async (res) => {
+		await getTemplates(currentTemplatePage).then(async (res) => {
 			let r = res as ExtendedAPIResponse;
 			let dat = r.data;
 			user_templates = dat as any[];
@@ -131,39 +121,35 @@
 	const onSearch = (e) => {
 		console.log(e);
 		const searchText = e.target.value.toLowerCase();
-		filteredUserClasses = user_classes.filter((cl) =>
-			cl.name.toLowerCase().includes(searchText)
-		);
+		filteredUserClasses = user_classes.filter((cl) => cl.name.toLowerCase().includes(searchText));
 	};
 
 	const onSearchTemplates = (e) => {
 		console.log(e);
 		const searchText = e.target.value.toLowerCase();
-		filteredUserTemplates = user_templates.filter((t)=> t.name.toLowerCase().includes(searchText));
+		filteredUserTemplates = user_templates.filter((t) => t.name.toLowerCase().includes(searchText));
 		console.log(user_templates);
 	};
 
 	onMount(async () => {
 		// TODO: Call API to get user data
-		await getUser().then(
-			async (res) => {
-				let r = res as ExtendedAPIResponse;
+		await getUser().then(async (res) => {
+			let r = res as ExtendedAPIResponse;
 
-				if (r.message.includes('NotAuthorizedException')) {
-					await refresh();
-					await retry();
-				}
-
-				let info = r.data as GetUserResponse;
-
-				user.set({
-					id: info.UserAttributes?.find((attr) => attr.Name === 'sub')?.Value || '',
-					name: info.UserAttributes?.find((attr) => attr.Name === 'name')?.Value || '',
-					email: info.UserAttributes?.find((attr) => attr.Name === 'email')?.Value || '',
-					type: info.UserAttributes?.find((attr) => attr.Name === 'custom:user_type')?.Value || ''
-				});
+			if (r.message.includes('NotAuthorizedException')) {
+				await refresh();
+				await retry();
 			}
-		);
+
+			let info = r.data as GetUserResponse;
+
+			user.set({
+				id: info.UserAttributes?.find((attr) => attr.Name === 'sub')?.Value || '',
+				name: info.UserAttributes?.find((attr) => attr.Name === 'name')?.Value || '',
+				email: info.UserAttributes?.find((attr) => attr.Name === 'email')?.Value || '',
+				type: info.UserAttributes?.find((attr) => attr.Name === 'custom:user_type')?.Value || ''
+			});
+		});
 
 		refresh_classes();
 
@@ -255,7 +241,15 @@
 				</div>
 			</div>
 			<!-- Nav groups for sidebar -->
-			<NavGroup category="Classes" searchable onAdd={addClass} {onSearch} onMore={getMore} isMore={currentClassPage < total_pages}>
+			<NavGroup
+				category="Classes"
+				searchable
+				onAdd={addClass}
+				{onSearch}
+				onMore={getMore}
+				addable={$user.type?.toLowerCase() === 'instructor'}
+				isMore={currentClassPage < total_pages}
+			>
 				{#if !classesLoaded}
 					<svg
 						width="24"
@@ -282,7 +276,15 @@
 				{/if}
 			</NavGroup>
 			{#if $user.type?.toLowerCase() === 'instructor'}
-				<NavGroup category="Templates" searchable onAdd={addTemplate} onSearch={onSearchTemplates} onMore={getMoreTemplate} isMore={currentTemplatePage < total_template_pages}>
+				<NavGroup
+					category="Templates"
+					searchable
+					addable={$user.type?.toLowerCase() === 'instructor'}
+					onAdd={addTemplate}
+					onSearch={onSearchTemplates}
+					onMore={getMoreTemplate}
+					isMore={currentTemplatePage < total_template_pages}
+				>
 					<!-- Loading icon-->
 					{#if !templatesLoaded}
 						<svg
@@ -365,7 +367,16 @@
 				>
 					<!-- Sidebar stuff but actually column stuff for mobile, navigation -->
 					<div class="w-full">
-						<NavGroup category="Classes" searchable onAdd={addClass}>
+						<!-- Nav groups for sidebar -->
+						<NavGroup
+							category="Classes"
+							searchable
+							onAdd={addClass}
+							{onSearch}
+							addable={$user.type?.toLowerCase() === 'instructor'}
+							onMore={getMore}
+							isMore={currentClassPage < total_pages}
+						>
 							{#if !classesLoaded}
 								<svg
 									width="24"
@@ -394,7 +405,15 @@
 					</div>
 					<div class="w-full">
 						{#if $user.type?.toLowerCase() === 'instructor'}
-							<NavGroup category="Templates" searchable onAdd={addTemplate}>
+							<NavGroup
+								category="Templates"
+								searchable
+								addable={$user.type?.toLowerCase() === 'instructor'}
+								onAdd={addTemplate}
+								onSearch={onSearchTemplates}
+								onMore={getMoreTemplate}
+								isMore={currentTemplatePage < total_template_pages}
+							>
 								<!-- Loading icon-->
 								{#if !templatesLoaded}
 									<svg
@@ -463,7 +482,6 @@
 		@apply flex flex-col lg:flex-row h-screen;
 	}
 
-	
 	@media (min-width: 1024px) {
 		.main {
 			@apply h-auto;

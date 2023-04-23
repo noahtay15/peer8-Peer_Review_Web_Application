@@ -8,7 +8,6 @@ import type { GetUserRequest, GetUserResponse } from 'aws-sdk/clients/cognitoide
 export async function GET({ locals }) {
     const cog = locals.cognito as AWS.CognitoIdentityServiceProvider;
 
-
     // TODO: Figure out how to do USER_SRP_AUTH instead
     const getUser = () => {
         return new Promise((resolve) => {

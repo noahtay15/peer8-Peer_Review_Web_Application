@@ -48,6 +48,22 @@ Make sure to install the dependencies:
 yarn install
 ```
 
+You can nows specify an instructor directory (users who can sign up as an instructor):
+
+
+```json
+// directory.json
+{
+    "directory": [
+        {
+            "name": "Jane Doe",
+            "email": "test@test.edu"
+        }
+    ]
+}
+```
+
+
 ## Database Initialization
 
 After providing a valid database connection string, you will have to generate the database structure like so:

@@ -96,6 +96,6 @@
 			multiSelect
             bind:value={value}
 		/>
-		<Button classNames="pt-20" onClick={create} action="Create Group" animation={false} />
+		<Button onClick={create} action="Create Group" animation={false} />
 	</Form>
 </template>

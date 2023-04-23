@@ -30,7 +30,7 @@ model classes {
   name           String           @db.VarChar(255)
   created_at     DateTime         @default(now())
   last_updated   DateTime         @default(now())
-  users          users            @relation(fields: [instructor_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_instructor_id")
+  users          users            @relation(fields: [instructor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_instructor_id")
   class_students class_students[]
   peer_reviews   peer_reviews[]
 }
@@ -40,8 +40,8 @@ model class_students {
   class_id   Int
   student_id Int
   accepted   Boolean
-  classes    classes @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_class_id")
-  users      users   @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_student_id")
+  classes    classes @relation(fields: [class_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_class_id")
+  users      users   @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_student_id")
 }
 
 model templates {
@@ -53,7 +53,7 @@ model templates {
   creator_id   Int
   questions    questions[]
   peer_reviews peer_reviews[]
-  creator      users          @relation(fields: [creator_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_creator_id")
+  creator      users          @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_creator_id")
 }
 
 model questions {
@@ -63,7 +63,7 @@ model questions {
   max_points   Int
   created_at   DateTime                @default(now())
   last_updated DateTime                @default(now())
-  templates    templates               @relation(fields: [template_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_template_id")
+  templates    templates               @relation(fields: [template_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_template_id")
   responses    peer_review_responses[]
 }
 
@@ -77,8 +77,8 @@ model peer_reviews {
   due_date                DateTime?
   created_at              DateTime                  @default(now())
   last_updated            DateTime                  @default(now())
-  templates               templates?                @relation(fields: [template_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_template_id_2")
-  classes                 classes                   @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_class_id_2")
+  templates               templates?                @relation(fields: [template_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_template_id_2")
+  classes                 classes                   @relation(fields: [class_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_class_id_2")
   peer_review_assignments peer_review_assignments[]
   peer_review_groups      peer_review_groups[]
   peer_review_submissions peer_review_submissions[]
@@ -87,18 +87,18 @@ model peer_reviews {
 model peer_review_assignments {
   id                      Int                       @id @default(autoincrement())
   peer_review_id          Int
-  group_id                Int?
+  group_id                Int?                      
   student_id              Int
   status                  String                    @db.VarChar(255)
-  final_score             Float?                      @default(0)
+  final_score             Float?                    @default(0)
   created_at              DateTime                  @default(now())
   last_updated            DateTime                  @default(now())
   comments                String?
-  peer_reviews            peer_reviews              @relation(fields: [peer_review_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_peer_review_id")
-  users                   users                     @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_student_id_2")
+  peer_reviews            peer_reviews              @relation(fields: [peer_review_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_peer_review_id")
+  users                   users                     @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_student_id_2")
   peer_review_submissions peer_review_submissions[]
   peer_review_responses   peer_review_responses[]
-  peer_review_groups      peer_review_groups?       @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_group_id")
+  peer_review_groups      peer_review_groups?       @relation(fields: [group_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_group_id")
 }
 
 model peer_review_responses {
@@ -111,9 +111,9 @@ model peer_review_responses {
   comments                  String?
   created_at                DateTime                 @default(now())
   last_updated              DateTime                 @default(now())
-  peer_review_submissions   peer_review_submissions? @relation(fields: [peer_review_submission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_peer_review_submission_id")
+  peer_review_submissions   peer_review_submissions? @relation(fields: [peer_review_submission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_peer_review_submission_id")
   student                   users                    @relation(fields: [student_id], references: [id])
-  question                  questions                @relation(fields: [question_id], references: [id])
+  question                  questions                @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_question_id")
   peer_review_assignment    peer_review_assignments  @relation(fields: [peer_review_assignment_id], references: [id])
 }
 
@@ -124,7 +124,7 @@ model peer_review_groups {
   created_at              DateTime                  @default(now())
   last_updated            DateTime                  @default(now())
   peer_review_submissions peer_review_submissions[]
-  peer_reviews            peer_reviews              @relation(fields: [peer_review_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_peer_review_id_2")
+  peer_reviews            peer_reviews              @relation(fields: [peer_review_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_peer_review_id_2")
   peer_review_assignments peer_review_assignments[]
 }
 
@@ -135,25 +135,26 @@ model peer_review_submissions {
   peer_review_group_id      Int?
   student_id                Int
   score                     Float?
+  omit                      Boolean                 @default(false)
   created_at                DateTime                @default(now())
   last_updated              DateTime                @default(now())
   peer_review_responses     peer_review_responses[]
-  peer_review_groups        peer_review_groups?     @relation(fields: [peer_review_group_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_peer_review_group_id")
+  peer_review_groups        peer_review_groups?     @relation(fields: [peer_review_group_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_peer_review_group_id")
   peer_reviews              peer_reviews?           @relation(fields: [peer_review_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_peer_review_id_3")
   peer_review_assignments   peer_review_assignments @relation(fields: [peer_review_assignment_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_peer_review_assignment_id_2")
-  users                     users                   @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_student_id_3")
+  users                     users                   @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_student_id_3")
   peer_review_scores        peer_review_scores[]
 }
 
 model peer_review_scores {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  score     Int
-  student   users    @relation("scores_student", fields: [studentId], references: [id])
-  scorer    users    @relation("scores_scorer", fields: [scorerId], references: [id])
-  studentId Int
-  scorerId  Int
+  id            Int                      @id @default(autoincrement())
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  score         Int
+  student       users                    @relation("scores_student", fields: [studentId], references: [id])
+  scorer        users                    @relation("scores_scorer", fields: [scorerId], references: [id])
+  studentId     Int
+  scorerId      Int
   submission_id Int?
-  submission peer_review_submissions? @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_submission_id")
+  submission    peer_review_submissions? @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_submission_id")
 }

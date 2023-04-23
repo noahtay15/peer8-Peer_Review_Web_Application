@@ -1,23 +1,19 @@
 <script lang="ts">
-	import Field from '../Field.svelte';
 	import Button from '../Button.svelte';
 	import Form from '../Form.svelte';
-	import { createClass, type ExtendedAPIResponse } from '$lib/api/api';
+	import { addStudents, createClass, type ExtendedAPIResponse } from '$lib/api/api';
 	import ActionButton from '$components/ActionButton.svelte';
 	import * as XLSX from 'xlsx';
+	import { page } from '$app/stores';
 
 	export let onSubmit = async () => {};
+
 	let error = '';
 	let fileInputRef: HTMLInputElement;
-	let students: {} = [];
+	let students: any[] = [];
 
 	const create = async () => {
 		let errors_length = 0;
-
-		if (!valid_class_name) {
-			classErr = 'Please enter a valid class name.';
-			errors_length++;
-		}
 
 		if (fileInputRef.files?.length === 0 || fileName === '') {
 			error = 'Please upload a spreadsheet.';
@@ -33,22 +29,26 @@
 			return;
 		}
 
-		createClass(
+		addStudents(
 			{
-				name: class_name,
-				students: students,
-			}
+                class_id: parseInt($page.params.id),
+                students: students.map((student) => {
+                    return {
+                        FirstName: student['First Name'],
+                        LastName: student['Last Name'],
+                        Email: student['Email']
+                    }
+                })
+            }
 		).then((res) => {
 			let r = res as ExtendedAPIResponse;
-			if (r.status === 201) {
+			if (r.status === 200) {
 				onSubmit();
 			} else {
 				error = r.message;
 			}
 		});
 	};
-
-	let classErr = '';
 
 	const validate = (rows) => {
 		// Check if the columns match the format (First Name, Last Name, Email)
@@ -117,15 +117,11 @@
 	let imported = false;
 	let fileName = '';
 	let studentsCount = 0;
-	let class_name = '';
-
-	let valid_class_name = false;
 </script>
 
 <template>
 	<h1 class="error">{error}</h1>
 	<Form>
-		<Field err_message={classErr} label="Name" type="text" placeholder="ex: Class 1" bind:value={class_name} bind:valid={valid_class_name} validator={(v)=>v !== ''} />
 		<input
 			type="file"
 			id="fileInput"
@@ -143,10 +139,10 @@
 			<p class="text-primary mt-2">{`Number of Students: ${studentsCount}`}</p>
 		{/if}
 		<label for="fileInput">
-			<ActionButton action="Import Students" animation={false} onClick={simulateFileInputClick} />
+			<ActionButton action="Import Students (.xlsx)" animation={false} onClick={simulateFileInputClick} />
 		</label>
 		<!-- <SelectCreate label='Students'/> -->
-		<Button onClick={create} action="Create Class" animation={false} />
+		<Button onClick={create} action="Import" animation={false} />
 	</Form>
 </template>
 

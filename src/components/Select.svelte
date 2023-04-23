@@ -77,15 +77,15 @@
 			svalue = '';
 		}
 
-		document.addEventListener('click', (event) => {
-			const input = document.querySelector(`#${label}-input`);
-			const dropContainer = document.querySelector(`#${label}-dropdown-container`);
-			if (!event.target) return;
-			const target = event.target as HTMLElement;
-			if (!target.closest('.comp') && input && dropContainer) {
-				closeDropdown();
-			}
-		});
+		// document.addEventListener('click', (event) => {
+		// 	const input = document.querySelector(`#${label}-input`);
+		// 	const dropContainer = document.querySelector(`#${label}-dropdown-container`);
+		// 	if (!event.target) return;
+		// 	const target = event.target as HTMLElement;
+		// 	if (!target.closest('.comp') && input && dropContainer) {
+		// 		// closeDropdown();
+		// 	}
+		// });
 	});
 
 	afterUpdate(() => {
@@ -140,7 +140,10 @@
 								class:non-selected-dropdown-option={!states[option] && multiSelect}
 							>
 								<!-- Checkmark -->
-								<CheckIcon size="24" class="w-5 h-5 text-gray-200" />
+								{#if states[option]}
+									<CheckIcon size="24" class="w-5 h-5 text-primary" />
+								{/if}
+								<!-- <CheckIcon size="24" class="w-5 h-5 text-gray-200" /> -->
 							</button>
 						{/if}
 						<span class="dropdown-option-text">{option.label || option}</span>
@@ -172,7 +175,7 @@
 	}
 
 	.dropdown-options-container {
-		@apply mt-2 absolute top-10 left-0 right-0 bg-white border border-gray-300 rounded-md z-10 max-h-64 overflow-y-auto shadow-md;
+		@apply mt-2 absolute left-0 right-0 top-10 bg-white border border-gray-300 rounded-md z-10 max-h-64 overflow-y-auto shadow-md;
 	}
 
 	.dropdown-option {

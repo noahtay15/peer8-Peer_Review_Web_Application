@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { onMount } from "svelte";
+	import { ChevronDownIcon, DeleteIcon, EditIcon, EyeIcon, LockIcon, TrashIcon } from "svelte-feather-icons";
+
 	interface Row {
 		[key: string]: any;
 	}
@@ -28,31 +31,13 @@
 		<thead class="bg-inputbg">
 			<tr>
 				{#each columns as column}
-					<th class="px-6 py-4 font-medium text-gray-900">{column.name}</th>
+					{#if column.key === 'actions'}
+						<th class="px-6 py-4 font-medium text-gray-900 w-48">
+						</th>
+					{:else}
+						<th class="px-6 py-4 font-medium text-gray-900">{column.name}</th>
+					{/if}
 				{/each}
-				{#if actionEnabled}
-					<th class="text-right pr-5">
-						<button on:click={onAdd}>
-							<span class="flex flex-row">
-								<svg
-									class="w-6 h-6"
-									fill="none"
-									stroke="#112E51"
-									viewBox="0 0 24 24"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M12 4v16m8-8H4"
-									/>
-								</svg>
-								<p class="ml-2 self-center text-primary align-right">Add</p>
-							</span>
-						</button>
-					</th>
-				{/if}
 			</tr>
 		</thead>
 		<tbody class="divide-y divide-gray-100 border-t border-gray-100">
@@ -60,14 +45,27 @@
 				<tr class="hover:bg-gray-50">
 					{#each columns as column}
 						{#if column.key === 'actions'}
-							<td class="px-6 py-4 text-right">
+							<td class="flex flex-row px-6 py-4 text-right">
 								{#each Object.entries(row[column.key]) as [key, action]}
+								<div class="flex flex-row ml-auto">
+									{#if action.icon}
+										{#if action.icon === 'delete'}
+											<TrashIcon class="w-5 h-5 self-center text-red-500" />
+										{:else if action.icon === 'edit'}
+											<EditIcon class="w-5 h-5 self-center text-primary" />
+										{:else if action.icon === 'close'}
+											<LockIcon class="w-5 h-5 self-center text-red-500" />
+										{:else if action.icon === 'eye'}
+											<EyeIcon class="w-5 h-5 self-center text-primary" />
+										{/if}
+									{/if}
 									<button
-										class="px-3 py-1 mr-2 rounded-md bg-primary text-white"
+										class={`px-3 py-1 mr-2 rounded-md text-primary font-semibold ${action.actionColor || 'text-primary'}`}
 										on:click={() => action.onClick(row)}
 									>
 										{action.label}
 									</button>
+								</div>
 								{/each}
 							</td>
 						{:else}

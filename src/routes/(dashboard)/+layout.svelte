@@ -7,8 +7,6 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import '../../app.postcss';
-	import PeerReview from '$components/Modals/CreatePeerReview.svelte';
-	import AddClass from '$components/Modals/AddClass.svelte';
 	import {
 		getUser,
 		refreshUser,
@@ -61,20 +59,63 @@
 		});
 	};
 
+	// page
+	let currentClassPage = 0;
+	let total_pages = 0;
+
+	let currentTemplatePage = 0;
+	let total_template_pages = 0;
+
 	const refresh_classes = async () => {
 		await getClasses(
-			0
+			currentClassPage
 		).then(async (res) => {
 			let r = res as ExtendedAPIResponse;
-			let dat = r.data as ClassData;
-			user_classes = dat.classes as Class[];
-			classesLoaded = true;
+			let dat = r.data as any;
+
+			if (dat) {
+				user_classes = dat.classes;
+				total_pages = dat.pages;
+				classesLoaded = true;
+			}
+
+			currentClassPage++;
 		});
 	};
 
+	const getMore = async () => {
+		++currentClassPage;
+		await getClasses(
+			currentClassPage
+		).then(async (res) => {
+			let r = res as ExtendedAPIResponse;
+			let dat = r.data as ClassData;
+
+			if (dat) {
+				user_classes = [...user_classes, ...dat.classes];
+				currentClassPage++;
+			}
+		});
+	}
+
+	const getMoreTemplate = async () => {
+		++currentTemplatePage;
+		await getTemplates(
+			currentTemplatePage
+		).then(async (res) => {
+			let r = res as ExtendedAPIResponse;
+			let dat = r.data as any;
+
+			if (dat) {
+				user_templates = [...user_templates, ...dat];
+				currentTemplatePage++;
+			}
+		});
+	}
+
 	const refresh_templates = async () => {
 		await getTemplates(
-			0
+			currentTemplatePage
 		).then(async (res) => {
 			let r = res as ExtendedAPIResponse;
 			let dat = r.data;
@@ -150,7 +191,7 @@
 		openModal({
 			id: 'addClass',
 			title: 'Create a Class',
-			content: $user.type?.toLowerCase() === 'instructor' ? CreateClass : AddClass,
+			content: $user.type?.toLowerCase() === 'instructor' ? CreateClass : null,
 			onSubmit: () => {
 				closeModal('addClass');
 				refresh_classes();
@@ -214,7 +255,7 @@
 				</div>
 			</div>
 			<!-- Nav groups for sidebar -->
-			<NavGroup category="Classes" searchable onAdd={addClass} {onSearch}>
+			<NavGroup category="Classes" searchable onAdd={addClass} {onSearch} onMore={getMore} isMore={currentClassPage < total_pages}>
 				{#if !classesLoaded}
 					<svg
 						width="24"
@@ -241,7 +282,7 @@
 				{/if}
 			</NavGroup>
 			{#if $user.type?.toLowerCase() === 'instructor'}
-				<NavGroup category="Templates" searchable onAdd={addTemplate} onSearch={onSearchTemplates}>
+				<NavGroup category="Templates" searchable onAdd={addTemplate} onSearch={onSearchTemplates} onMore={getMoreTemplate} isMore={currentTemplatePage < total_template_pages}>
 					<!-- Loading icon-->
 					{#if !templatesLoaded}
 						<svg

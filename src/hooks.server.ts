@@ -17,6 +17,7 @@ export async function handle({ event, resolve }: { event: any, resolve: any }) {
         '/api/login',
         '/api/signup',
         '/api/verify',
+        '/api/forgot',
     ];
 
     // Verifier that expects valid access tokens:

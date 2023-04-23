@@ -6,6 +6,8 @@
 	export let addable = true;
 	export let onAdd = () => {};
 	export let onSearch = (e: any) => {};
+	export let onMore = () => {};
+	export let isMore = false;
 </script>
 
 <div class="comp">
@@ -14,21 +16,32 @@
 			<div class="flex flex-row">
 				<h1 class="nav-group-title">{category}</h1>
 				{#if addable}
-				<div class="ml-auto" on:click={onAdd} on:keyup={onAdd}>
-					<IconButton icon={PlusIcon} classes="ml-[10rem]" />
-				</div>
+					<div class="ml-auto" on:click={onAdd} on:keyup={onAdd}>
+						<IconButton icon={PlusIcon} classes="ml-[10rem]" />
+					</div>
 				{/if}
 			</div>
 			{#if searchable}
 				<div class="nav-group-search">
 					<SearchIcon class="absolute w-5 h-5 top-[.6rem] left-3" />
-					<input class="nav-group-search-input" type="text" placeholder="Search" on:input={onSearch} />
+					<input
+						class="nav-group-search-input"
+						type="text"
+						placeholder="Search"
+						on:input={onSearch}
+					/>
 				</div>
 			{/if}
 		</div>
 		<div class="nav-group-items">
 			<slot />
 		</div>
+		<!-- Load more -->
+		{#if isMore}
+			<div class="flex mt-5">
+				<button class="text-textinactive text-center mx-auto" on:click={onMore}>Load more</button>
+			</div>
+		{/if}
 	</div>
 </div>
 

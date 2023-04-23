@@ -94,6 +94,8 @@
 		});
 	};
 
+	$: shortenedClassName = className.name.length > 20 ? className.name.substring(0, 30) + '...' : className.name;
+
 	onMount(() => {
 		getClassInfo(parseInt($page.params.id)).then((res) => {
 			let r = res.data as any;
@@ -107,7 +109,7 @@
 </script>
 
 <div>
-	<h1 class="page-heading">{className.name}</h1>
+	<h1 class="page-heading">{shortenedClassName}</h1>
 	<h2 class="subheading">Peer Review Assignments</h2>
 	<Pagination
 		currentPage={currentPage}

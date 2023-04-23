@@ -220,6 +220,7 @@ export async function POST({ request, locals }) {
 
 		// Filter out any null or undefined students
 		const validStudents = studentsToAdd.filter((student) => student != null);
+		console.log(validStudents);
 
 		// Create the new class-student relations
 		const newClassStudents = validStudents.map((student) => {
@@ -230,10 +231,54 @@ export async function POST({ request, locals }) {
 			};
 		});
 
-		// Insert the new students into the class
-		await prisma.class_students.createMany({
-			data: newClassStudents,
-			skipDuplicates: true
+		// Insert the new students into the class if they don't already exist
+		await Promise.all(
+			newClassStudents.map(async (classStudent) => {
+				const existingClassStudent = await prisma.class_students.findFirst({
+					where: {
+						class_id: classStudent.class_id,
+						student_id: classStudent.student_id
+					}
+				});
+
+				if (!existingClassStudent) {
+					await prisma.class_students.create({
+						data: classStudent
+					});
+				}
+			})
+		);
+
+		// get all peer reviews for the class
+		const peerReviews = await prisma.peer_reviews.findMany({
+			where: {
+				class_id: class_id
+			}
+		});
+
+		// Create any missing peer review assignments
+		peerReviews.forEach(async (peerReview) => {
+			// Create peer review assignments for each student
+			await Promise.all(
+				validStudents.map(async (student) => {
+					const assignment = await prisma.peer_review_assignments.findFirst({
+						where: {
+							peer_review_id: peerReview.id,
+							student_id: student?.id as number
+						}
+					});
+
+					if (!assignment) {
+						await prisma.peer_review_assignments.create({
+							data: {
+								peer_review_id: peerReview.id,
+								student_id: student?.id as number,
+								status: 'assigned'
+							}
+						});
+					}
+				})
+			);
 		});
 
 		if (errors.length > 0) {

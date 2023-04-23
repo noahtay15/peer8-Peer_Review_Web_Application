@@ -1,3 +1,4 @@
+import { recalculateScores } from '$lib/utils/recalculateScores';
 import type { peer_review_assignments } from '@prisma/client';
 import { json } from '@sveltejs/kit';
 

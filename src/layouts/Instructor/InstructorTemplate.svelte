@@ -4,6 +4,7 @@
 	import Pagination from '$components/Pagination.svelte';
 	import Table from '$components/Table.svelte';
     import Modal from '$components/Modal.svelte';
+	import Searchbar from '$components/Searchbar.svelte';
 	let currentPage = 0;
 	let totalPages = 0;
 	let prevPage = () => {};
@@ -23,7 +24,7 @@
 <div>
 	<h1 class="page-heading">Questions</h1>
 	<div class="md:ml-auto md:w-96">
-		<ActionButton
+		<!-- <ActionButton
 			action="Add Question"
 			onClick={async () =>
 				openModal({
@@ -39,8 +40,9 @@
 				})}
 			animation={false}
 			classNames="md:ml-auto md:self-center md:pt-8"
-		/>
+		/> -->
 	</div>
+	<Searchbar />
 	<Pagination {currentPage} {totalPages} {nextPage} {prevPage} />
 	<Table />
     <div>

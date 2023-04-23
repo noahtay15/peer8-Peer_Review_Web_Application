@@ -1,25 +1,25 @@
 <script lang="ts">
-	import { page } from "$app/stores";
+	import ActionButton from "$components/ActionButton.svelte";
 	import Button from "$components/Button.svelte";
-	import { deleteStudent } from "$lib/api/api";
+	import { unomitSubmission } from "$lib/api/api";
     export let onSubmit = async () => {};
     export let onClose = async () => {};
 
-    export let student_id = -1;
-
+    export let submission_id = -1;
     let error = ""
 
-    const deleteS = async () => {
-        const data = {
-            class_id: parseInt($page.params.id),
-            students: [
-                {
-                    student_id: student_id
-                }
-            ]
+    const unomit = async () => {
+
+        if (submission_id === -1) {
+            error = "Submission not found.";
+            return;
         }
 
-        await deleteStudent(data).then((res) => {
+        const data = {
+            submission_id: submission_id,
+        }
+
+        await unomitSubmission(data).then((res) => {
             let r = res as any;
             if (r.status === 200) {
                 onSubmit();
@@ -35,8 +35,8 @@
 </script>
 <template>
     <h1 class="mt-4 text-red-500">{error}</h1>
-	<p class="mt-5 text-xl">Are you sure you want to delete this student from this class?</p>
-    <p class="mt-3 text-red-700">You will not be able to undo this action and all submissions from this student in this class will be erased!</p>
+	<p class="mt-5 text-xl">Are you sure you want to un-omit this submission?</p>
+    <p class="mt-3">Their submission will be counted towards their group's final score.</p>
 	<div class="flex flex-row justify-between">
         <Button
             classNames="mt-5"
@@ -44,12 +44,11 @@
             animation={false}
             onClick={onClose}
         />
-        <Button
+        <ActionButton
             classNames="mt-5 ml-5 bg-red-500 hover:bg-red-700"
-            action="Delete"
+            action="Un-omit"
             animation={false}
-            deleteAction
-            onClick={deleteS}
+            onClick={unomit}
         />
     </div>
 </template>

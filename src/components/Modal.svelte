@@ -11,8 +11,11 @@
 
 	export let onSubmit: () => void;
 	export let onClose: () => void;
+	
+	// Create event dispatcher
 
 	function handleFormSubmit() {
+		console.log("hii test")
 		if (onSubmit) {
 			onSubmit();
 		}
@@ -49,7 +52,7 @@
 					/>
 				</svg>
 			</div>
-			<div class="modal-content" style="max-height: 50vh; overflow-y: auto;">
+			<div class="modal-content" style="max-height: 50vh;">
 				<slot />
 			</div>
 		</div>
@@ -67,16 +70,18 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		overflow-y: auto;
 	}
 
 	.modal {
 		background-color: #fff;
-		padding: 2rem;
 		border-radius: 5px;
+		height: fit-content;
+
+		@apply px-6 py-6;
 	}
 
 	.modal-content {
-		@apply px-2;
 		min-width: 350px;
 	}
 
@@ -89,6 +94,9 @@
 	}
 
 	.modal-content::-webkit-scrollbar {
+		position: absolute;
+		margin-left: 2rem;
+		padding-left: 2rem;
 		width: 5px;
 	}
 

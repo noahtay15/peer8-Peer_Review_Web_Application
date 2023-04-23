@@ -35,6 +35,35 @@ export async function GET({ locals, url }) {
 		}
 	});
 
+	// Update the peer reviews above to check if they are past the due date
+	// If they are, then update the peer review to be completed
+	peerReviews.forEach(async (peerReview) => {
+		const dueDate = new Date(peerReview.due_date);
+		const now = new Date();
+
+		if (dueDate < now) {
+			await prisma.peer_reviews.update({
+				where: {
+					id: peerReview.id
+				},
+				data: {
+					status: 'closed'
+				}
+			});
+
+			// Also update any peer review assignments that are still open
+			await prisma.peer_review_assignments.updateMany({
+				where: {
+					peer_review_id: peerReview.id,
+					status: 'assigned'
+				},
+				data: {
+					status: 'closed'
+				}
+			});
+		}
+	});
+
 	if (!peerReviews || peerReviews.length === 0) {
 		return json({ message: 'No peer reviews found.' }, { status: 404 });
 	}

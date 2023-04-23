@@ -45,6 +45,21 @@ export async function POST({ request, locals }: { request: Request; locals: App.
 			})
 		);
 
+		// Update all prior submissions for all students in the list to point to the new group
+		await Promise.all(
+			student_ids.map(async (student_id: number) => {
+				return await prisma.peer_review_submissions.updateMany({
+					where: {
+						student_id,
+						peer_review_id
+					},
+					data: {
+						peer_review_group_id: newGroup.id
+					}
+				});
+			})
+		);
+
 		return {
 			...newGroup
 		};
@@ -54,6 +69,53 @@ export async function POST({ request, locals }: { request: Request; locals: App.
 		{
 			message: 'Successfully retrieved new group.',
 			data: { group: newGroupData }
+		},
+		{ status: 200 }
+	);
+}
+
+
+// Delete group route
+
+export async function DELETE({ request, locals }: { request: Request; locals: App.Locals }) {
+	const body = await request.json();
+
+	// Extract group_id from the request body
+	const { group_id } = body;
+
+	const errors: string[] = [];
+
+	// Validate body
+	if (!group_id) {
+		errors.push('Missing group_id.');
+	}
+
+	if (errors.length > 0) {
+		return json({ message: 'Missing or invalid fields.', errors }, { status: 400 });
+	}
+
+	const prisma = locals.prisma as PrismaClient;
+
+	// Start a transaction
+	const deletedGroupData = await prisma.$transaction(async (prisma) => {
+		console.log(group_id);
+
+		// Delete the group
+		const deletedGroup = await prisma.peer_review_groups.delete({
+			where: {
+				id: group_id
+			}
+		});
+
+		return {
+			...deletedGroup
+		};
+	});
+
+	return json(
+		{
+			message: 'Successfully deleted group.',
+			data: { group: deletedGroupData }
 		},
 		{ status: 200 }
 	);

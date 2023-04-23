@@ -8,13 +8,25 @@
 	import { ChevronLeftIcon } from 'svelte-feather-icons';
 	import { onMount } from 'svelte';
 	import CreateGroup from '$components/Modals/CreateGroup.svelte';
-	import { fetchGroups, type ExtendedAPIResponse, getSubmissions, getScores, getReview, getClassInfo } from '$lib/api/api';
+	import {
+		fetchGroups,
+		type ExtendedAPIResponse,
+		getSubmissions,
+		getScores,
+		getReview,
+		getClassInfo
+	} from '$lib/api/api';
 	import { page } from '$app/stores';
 	import Pagination from '$components/Pagination.svelte';
 	import Button from '$components/Button.svelte';
 	import { goto } from '$app/navigation';
 	import { utils, writeFile } from 'xlsx';
 	import { className, peerReview } from '$lib/stores/info';
+	import RandomizeGroup from '$components/Modals/RandomizeGroup.svelte';
+	import DeleteGroup from '$components/Modals/DeleteGroup.svelte';
+	import OmitScore from '$components/Modals/OmitScore.svelte';
+	import UnomitScore from '$components/Modals/UnomitScore.svelte';
+	import Searchbar from '$components/Searchbar.svelte';
 
 	let tabs = [
 		{
@@ -69,6 +81,12 @@
 					{
 						name: 'Score',
 						key: 'score',
+						sortable: true,
+						searchable: true
+					},
+					{
+						name: 'Omitted',
+						key: 'omit',
 						sortable: true,
 						searchable: true
 					},
@@ -157,11 +175,13 @@
 			let r = res as ExtendedAPIResponse;
 			if (r.status === 200) {
 				tabs[2].props.data = r.data.groups.map((pr: any) => {
+					console.log(r.data.groups);
 					return {
 						name: pr.name,
 						actions: {
 							view: {
 								label: 'View',
+								icon: 'eye',
 								onClick: (row: any) => {
 									// Format needs to be /class/:id/review/:peer_review_id/group/:group_id
 									goto(
@@ -169,6 +189,28 @@
 											$page.url.pathname.split('/')[4]
 										}/group/${pr.id}`
 									);
+								}
+							},
+							delete: {
+								label: 'Delete',
+								icon: 'delete',
+								actionColor: 'text-red-500',
+								onClick: (row: any) => {
+									openModal({
+										id: 'deleteGroup',
+										title: 'Delete Group',
+										content: DeleteGroup,
+										onSubmit: async () => {
+											await getGroups(currentPageGroups);
+											closeModal('deleteGroup');
+										},
+										onClose: () => {
+											closeModal('deleteGroup');
+										},
+										props: {
+											group_id: pr.id
+										}
+									});
 								}
 							}
 						}
@@ -186,6 +228,8 @@
 		});
 	};
 
+	$: filteredSubmissions = tabs[1].props.data
+
 	const retrieveSubmissions = async (page: number) => {
 		getSubmissions({
 			peer_review_id: parseInt($page.url.pathname.split('/')[4]),
@@ -197,8 +241,52 @@
 					return {
 						name: pr.users.name,
 						email: pr.users.email,
-						score: pr.score ? pr.score : 'Not yet determined.',
-						actions: {}
+						score: pr.score,
+						omit: pr.omit ? 'Yes' : 'No',
+						actions: {
+							unomit: {
+								label: 'Unomit',
+								onClick: (row: any) => {
+									openModal({
+										id: 'unomitSubmission',
+										title: 'Un-omit Submission',
+										content: UnomitScore,
+										onSubmit: async () => {
+											await retrieveSubmissions(currentPageSubmissions);
+											closeModal('unomitSubmission');
+										},
+										onClose: () => {
+											closeModal('unomitSubmission');
+										},
+										props: {
+											submission_id: pr.id
+										}
+									});
+								}
+							},
+							omit: {
+								label: 'Omit',
+								icon: 'delete',
+								actionColor: 'text-red-500',
+								onClick: (row: any) => {
+									openModal({
+										id: 'omitSubmission',
+										title: 'Omit Submission',
+										content: OmitScore,
+										onSubmit: async () => {
+											await retrieveSubmissions(currentPageSubmissions);
+											closeModal('omitSubmission');
+										},
+										onClose: () => {
+											closeModal('omitSubmission');
+										},
+										props: {
+											submission_id: pr.id
+										}
+									});
+								}
+							},
+						}
 					};
 				});
 
@@ -363,7 +451,7 @@
 							title: 'Create New Group',
 							content: CreateGroup,
 							onSubmit: async () => {
-								await getGroups(0);
+								await getGroups(currentPageGroups);
 								closeModal('addPeerReview');
 							},
 							onClose: () => {
@@ -385,14 +473,17 @@
 					action: 'Auto-Create and Assign Groups',
 					onClick: () => {
 						openModal({
-							id: 'addPeerReview',
-							title: 'Generate Report for Peer Review',
-							content: PeerReview,
+							id: 'randomizeGroup',
+							title: 'Auto-Create and Assign Groups',
+							content: RandomizeGroup,
 							onSubmit: async () => {
-								closeModal('addPeerReview');
+								closeModal('randomizeGroup');
 							},
 							onClose: () => {
-								closeModal('addPeerReview');
+								closeModal('randomizeGroup');
+							},
+							props: {
+								review_id: parseInt($page.url.pathname.split('/')[4])
 							}
 						});
 					},
@@ -412,13 +503,18 @@
 			<Table {...tabs[currentTab].props} />
 		</TabContent>
 		<TabContent index={1} current={currentTab}>
+			<Searchbar onSearch={(search) => {
+				filteredSubmissions = tabs[1].props.data.filter((submission) => {
+					return submission.name.toLowerCase().includes(search.toLowerCase());
+				});
+			}} />
 			<Pagination
 				currentPage={currentPageSubmissions}
 				totalPages={totalPagesSubmssions}
 				{nextPage}
 				{prevPage}
 			/>
-			<Table {...tabs[currentTab].props} />
+			<Table columns={tabs[currentTab].props.columns} data={filteredSubmissions}/>
 		</TabContent>
 		<TabContent index={2} current={currentTab}>
 			<Pagination

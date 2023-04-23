@@ -39,6 +39,24 @@ export async function GET({ locals, url }: { locals: App.Locals, url: URL }) {
         skip: sanitizedPage * 20,
         take: 20,
     });
+
+    // Check if any of the assignments are past the due date
+    // If they are, then update the peer review to be completed
+    assignments.forEach(async (assignment) => {
+        const dueDate = new Date(assignment.peer_reviews.due_date as unknown as string);
+        const now = new Date();
+
+        if (dueDate < now) {
+            await prisma.peer_review_assignments.update({
+                where: {
+                    id: assignment.id,
+                },
+                data: {
+                    status: 'closed',
+                },
+            });
+        }
+    });
     
 
     const total_length = await prisma.peer_review_assignments.count({

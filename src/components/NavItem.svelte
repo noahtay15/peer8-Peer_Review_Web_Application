@@ -14,6 +14,8 @@
 	export let className = '';
 	export let icon = 'grad';
 
+	let shortenedClassName = className.length > 20 ? className.substring(0, 20) + '...' : className;
+
 	const navigate = () => {
 		goto(href);
 	};
@@ -32,7 +34,7 @@
 			{/if}
 		</div>
 
-		<p>{className}</p>
+		<p>{shortenedClassName}</p>
 	</div>
 </div>
 

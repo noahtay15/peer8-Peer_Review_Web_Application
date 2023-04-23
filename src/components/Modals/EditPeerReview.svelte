@@ -4,12 +4,18 @@
 	import Button from '../Button.svelte';
 	import Form from '../Form.svelte';
 	import { editPeerReview } from '$lib/api/api';
+	import { createEventDispatcher } from 'svelte';
 
 	export let onSubmit = async () => {};
     export let review_id = -1;
 
 	export let review_name = '';
 	export let due_date = '';
+
+	// Create event dispatcher
+	const dispatch = createEventDispatcher();
+
+	let error = '';
 
 	const create = async () => {
         console.log(due_date)
@@ -35,13 +41,19 @@
             review_id
 		}).then((res) => {
 			console.log(res);
-		});
 
-		onSubmit();
+			if (res.status === 201) {
+				dispatch('closeModal', 'editPeerReview');
+				onSubmit();
+			} else {
+				error = res.data.message;
+			}
+		});
 	};
 </script>
 
 <template>
+	<h1>{error}</h1>
 	<Form>
 		<Field
 			label="Name"

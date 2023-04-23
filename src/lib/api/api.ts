@@ -389,6 +389,157 @@ export const deleteStudent = async (data: DeleteStudentsRequest): Promise<Extend
     } as ExtendedAPIResponse;
 }
 
+interface DeleteGroupRequest {
+    group_id: number;
+}
+
+export const deleteGroup = async (data: DeleteGroupRequest): Promise<ExtendedAPIResponse> => {
+    let res = {
+        message: "Unknown error.",
+        errors: [],
+        data: null
+    } as APIResponse;
+
+    let status = 0;
+    
+    await fetch(`/api/group`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            AuthorizationId: `Bearer ${localStorage.getItem("id_token")}`,
+        },
+        body: JSON.stringify(data)
+    }).then(async (response) => {
+        res = await response.json() as APIResponse;
+        status = response.status;
+    });
+
+    return {
+        status: status,
+        ...res
+    } as ExtendedAPIResponse;
+}
+
+interface UnOmitSubmissionRequest {
+    submission_id: number;
+}
+
+export const unomitSubmission = async (data: UnOmitSubmissionRequest): Promise<ExtendedAPIResponse> => {
+    let res = {
+        message: "Unknown error.",
+        errors: [],
+        data: null
+    } as APIResponse;
+
+    let status = 0;
+    
+    await fetch(`/api/submission`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            AuthorizationId: `Bearer ${localStorage.getItem("id_token")}`,
+        },
+        body: JSON.stringify(data)
+    }).then(async (response) => {
+        res = await response.json() as APIResponse;
+        status = response.status;
+    });
+
+    return {
+        status: status,
+        ...res
+    } as ExtendedAPIResponse;
+}
+
+export const forgotPassword = async (email: string): Promise<ExtendedAPIResponse> => {
+    let res = {
+        message: "Unknown error.",
+        errors: [],
+        data: null
+    } as APIResponse;
+
+    let status = 0;
+    
+    await fetch(`/api/forgot?email=${email}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            AuthorizationId: `Bearer ${localStorage.getItem("id_token")}`,
+        },
+    }).then(async (response) => {
+        res = await response.json() as APIResponse;
+        status = response.status;
+    });
+
+    return {
+        status: status,
+        ...res
+    } as ExtendedAPIResponse;
+}
+
+export const resetPassword = async (data: any): Promise<ExtendedAPIResponse> => {
+    let res = {
+        message: "Unknown error.",
+        errors: [],
+        data: null
+    } as APIResponse;
+
+    let status = 0;
+    
+    await fetch(`/api/forgot`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            AuthorizationId: `Bearer ${localStorage.getItem("id_token")}`,
+        },
+        body: JSON.stringify(data)
+    }).then(async (response) => {
+        res = await response.json() as APIResponse;
+        status = response.status;
+    });
+
+    return {
+        status: status,
+        ...res
+    } as ExtendedAPIResponse;
+}
+
+interface OmitSubmissionRequest {
+    submission_id: number;
+}
+
+export const omitSubmission = async (data: OmitSubmissionRequest): Promise<ExtendedAPIResponse> => {
+    let res = {
+        message: "Unknown error.",
+        errors: [],
+        data: null
+    } as APIResponse;
+
+    let status = 0;
+    
+    await fetch(`/api/submission`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            AuthorizationId: `Bearer ${localStorage.getItem("id_token")}`,
+        },
+        body: JSON.stringify(data)
+    }).then(async (response) => {
+        res = await response.json() as APIResponse;
+        status = response.status;
+    });
+
+    return {
+        status: status,
+        ...res
+    } as ExtendedAPIResponse;
+}
+
 export const getReview = async (data: any): Promise<ExtendedAPIResponse> => {
     let res = {
         message: "Unknown error.",
@@ -497,6 +648,39 @@ export const fetchGroups = async (data: any): Promise<ExtendedAPIResponse> => {
         ...res
     } as ExtendedAPIResponse;
 }
+
+interface RandomizeGroupRequest {
+    peer_review_id: number;
+}
+
+export const randomizeGroups = async (data: RandomizeGroupRequest): Promise<ExtendedAPIResponse> => {
+    let res = {
+        message: "Unknown error.",
+        errors: [],
+        data: null
+    } as APIResponse;
+    
+    let status = 0;
+
+    await fetch(`/api/groups`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            AuthorizationId: `Bearer ${localStorage.getItem("id_token")}`,
+        },
+        body: JSON.stringify(data)
+    }).then(async (response) => {
+        res = await response.json() as APIResponse;
+        status = response.status;
+    });
+
+    return {
+        status: status,
+        ...res
+    } as ExtendedAPIResponse;
+}
+
 
 export const getPeerReviewAssignments = async (data: any): Promise<ExtendedAPIResponse> => {
     let res = {
